@@ -26,12 +26,12 @@ console.log("calling router")
 app.use(require("./routers"))
 
 // handling error
-app.use((req, res, next) => {
-    console.log("centralize error")
-    const error = new Error('Not Found')
-    error.status = 404
-    next(error)
-})
+// app.use((req, res, next) => {
+//     console.log("centralize error")
+//     const error = new Error('Not Found')
+//     error.status = 404
+//     next(error)
+// })
 
 // app.use((error, req, res, next) => {
 //     console.log("hadling error")

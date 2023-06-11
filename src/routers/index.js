@@ -11,5 +11,7 @@ const router = express.Router()
 router.use('/v1/api', require("./access"))
 router.use('/v1/upload', require("./upload"))
 router.use('/uploads',require("./upload"))
+router.use('/post',require("./post"))
+router.use('/user',require("./userInfor"))
 
 module.exports = router

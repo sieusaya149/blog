@@ -185,6 +185,18 @@ class Database
         throw error;
       }
     }
+
+    async getCategory(categroryName)
+    {
+      try {
+        const query = 'SELECT * FROM CATEGORY WHERE categroryName = ? ';
+        const result = await this.executeQueryV2(query, [categroryName]);
+        return result.length > 0? result[0]: null;
+      }
+      catch (error) {
+        return null
+      }
+    }
 }
 
 const instanceMySqlDB = Database.getInstance()
