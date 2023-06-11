@@ -3,10 +3,7 @@ const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const path = require('path');
 const ImageData = require('../dbs/image.mysql')
 
-const os = require('os');
-const subfolder = '..';
-const absolutePath = path.join(os.homedir(), subfolder);
-console.log('Absolute path:', absolutePath);
+
 class UploadService
 {
     static uploadSingleImage = async (req) =>{

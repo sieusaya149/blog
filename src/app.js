@@ -22,25 +22,24 @@ require("./dbs/init.mysql")
 //C. init handle error
 
 //init routes
-console.log("calling router")
 app.use(require("./routers"))
 
 // handling error
-// app.use((req, res, next) => {
-//     console.log("centralize error")
-//     const error = new Error('Not Found')
-//     error.status = 404
-//     next(error)
-// })
+app.use((req, res, next) => {
+    console.log("centralize error")
+    const error = new Error('Not Found')
+    error.status = 404
+    next(error)
+})
 
-// app.use((error, req, res, next) => {
-//     console.log("hadling error")
-//     const statusCode = error.status || 500
-//     return res.status(statusCode).json({
-//         status: 'error',
-//         code: statusCode,
-//         message: error.message || "internal server error"
-//     })
-// })
+app.use((error, req, res, next) => {
+    console.log("hadling error")
+    const statusCode = error.status || 500
+    return res.status(statusCode).json({
+        status: 'error',
+        code: statusCode,
+        message: error.message || "internal server error"
+    })
+})
 
 module.exports = app

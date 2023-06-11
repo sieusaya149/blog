@@ -101,4 +101,5 @@ const API = {
     API_KEY: "8da9be05-6d98-4c2f-ab9e-f1e76a43af01"
 }
 
+
 module.exports = {DB_CONFIG, DB_QUERYs}
