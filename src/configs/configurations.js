@@ -2,7 +2,7 @@
 const DB_CONFIG = {
     HOST: 'localhost',
     USER: 'root',
-    PASSWORD: 'my-secret-pw',
+    PASSWORD: '123',
     DATABASE: 'blog_project'
 }
 
