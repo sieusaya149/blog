@@ -1,13 +1,8 @@
 'use strict'
 let mysql = require('mysql2'); // should be using mysql2 for authentication
+const {DB_QUERYs} = require("../configs/configurations")
+require('dotenv').config()
 
-const {DB_CONFIG, DB_QUERYs} = require("../configs/configurations")
-let connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'my-secret-pw',
-    database: 'blog_project'
-});
 class Database
 {
     constructor()
@@ -27,21 +22,30 @@ class Database
             this.executeQuery(DB_QUERYs.CREATE_KEY_STORE_TABLE, "CREATE_KEY_STORE_TABLE");
         }
     }
-    connect()
+     connect()
     {
-        try {
-            const connection = mysql.createConnection({host: DB_CONFIG.HOST,
-                                                      user: DB_CONFIG.USER,
-                                                      password: DB_CONFIG.PASSWORD,
-                                                      database: DB_CONFIG.DATABASE})
-            
-            console.log(`Connected MySQL Successfully `)
-            return connection
-        } catch (error) {
-            this.connection == null
-            console.log(`Error Connect DB!`)
+        const MYSQL_HOST = process.env.MYSQL_HOST
+        const MYSQL_PORT = process.env.MYSQL_PORT
+        const MYSQL_USER = process.env.MYSQL_USER
+        const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD
+        const MYSQL_DATABASE = process.env.MYSQL_DATABASE
+        console.log(`Connect to MYSQL ${MYSQL_USER}@${MYSQL_HOST}:${MYSQL_PORT} with ${MYSQL_PASSWORD} to DB ${MYSQL_DATABASE}}`)
+        const connection = mysql.createConnection({host: MYSQL_HOST || 'mysql',
+                                                  user: MYSQL_USER || 'hunghoang',
+                                                  password: MYSQL_PASSWORD || '123',
+                                                  database: MYSQL_DATABASE || 'blog'
+                                                  });
+
+        connection.connect(function(err) {
+          if (err)
+          { 
+            console.log(`Connect failed with error ${err}`)
             return null;
-        }
+          }
+          console.log(`Connected MySQL Successfully `)
+        });
+    
+        return connection
     }
 
     executeQuery(query, logging) {

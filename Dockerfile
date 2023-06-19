@@ -1,10 +1,17 @@
-FROM ubuntu:20.04
-ENV DEBIAN_FRONTEND=noninteractive 
+FROM node:19
 
-RUN apt update -y
-RUN apt install -y make build-essential libssl-dev zlib1g-dev \
-    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
-    libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev \
-    liblzma-dev python-openssl git vim
+# Create app directory
+WORKDIR /app
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package.json .
+# RUN npm install -g npm@9.7.1
+RUN npm i
 
-RUN apt install mysql-server -y
+# Bundle app source
+COPY . .
+
+EXPOSE 3000
+
+CMD [ "node", "server.js" ]

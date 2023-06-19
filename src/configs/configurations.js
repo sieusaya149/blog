@@ -1,10 +1,4 @@
  
-const DB_CONFIG = {
-    HOST: 'localhost',
-    USER: 'root',
-    PASSWORD: '123',
-    DATABASE: 'blog_project'
-}
 
 const DB_QUERYs = {
     CREATE_USER_TABLE : "CREATE TABLE IF NOT EXISTS USER(\
@@ -102,4 +96,4 @@ const API = {
 }
 
 
-module.exports = {DB_CONFIG, DB_QUERYs}
+module.exports = { DB_QUERYs}

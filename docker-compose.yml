@@ -1,0 +1,64 @@
+version: "3.8"
+
+services: 
+    app:
+      build: 
+        context: .
+        dockerfile: Dockerfile
+      ports: 
+        - 3000:3000
+      container_name: backend
+      depends_on: 
+        - mysql
+      networks:
+        mysql-phpmyadmin:
+          aliases:
+          - backend
+      command: sh -c "sleep 30 && node server.js"
+
+    mysql:
+      image: mysql:8.0
+      container_name: mysql
+      environment: 
+        - MYSQL_DATABASE=blog
+        - MYSQL_USER=hunghoang
+        - MYSQL_PASSWORD=123
+        - MYSQL_ROOT_PASSWORD=123
+      ports:
+          - "3306:3306"
+      volumes:
+          - mysqldata:/var/lib/mysql
+      networks:
+        mysql-phpmyadmin:
+          aliases:
+            - mysql
+
+    phpmyadmin:
+        image: phpmyadmin:5.2.0
+        container_name: phpmyadmin
+        links:
+            - mysql
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+        ports:
+            - 8081:80
+        networks:
+          mysql-phpmyadmin:
+              aliases:
+              - phpmyadmin
+
+networks:
+    mysql-phpmyadmin:
+        name: mysql-phpmyadmin
+        # use the bridge driver
+        driver: bridge
+
+volumes:
+    mysqldata:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: '/Users/hunghoang/project/blogging_BE_site/data'
+    

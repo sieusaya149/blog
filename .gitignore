@@ -2,3 +2,5 @@
 .env
 index.html
 /uploads
+/deployment
+/data
