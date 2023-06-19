@@ -60,5 +60,5 @@ volumes:
         driver_opts:
             type: 'none'
             o: 'bind'
-            device: '/Users/hunghoang/project/blogging_BE_site/data'
+            device: './data'
     
