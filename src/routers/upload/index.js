@@ -15,8 +15,11 @@ const relativeUploadsPath = 'uploads';
 // Define the uploads directory relative to the blog directory
 const uploadsDirectory = path.join(rootDirectory, 'uploads');
 const upload = multer({ dest: uploadsDirectory });
-
-router.use(authentication)
+require('dotenv').config()
+if(process.env.OFF_AUTHEN == true)
+{
+    router.use(authentication)
+}
 // logout api
 router.post('/image', upload.single('image'), asyncHanlder(UploadController.uploadSingleImage))
 router.post('/images', upload.array('images'), asyncHanlder(UploadController.uploadMultipleImage))

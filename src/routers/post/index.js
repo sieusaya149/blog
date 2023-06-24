@@ -5,9 +5,12 @@ const router = express.Router()
 const {asyncHanlder} = require('../../helpers/asyncHandler')
 const { authentication } = require('../../auth/authUtils')
 const PostController = require('../../controllers/post.controller')
+require('dotenv').config()
+if(process.env.OFF_AUTHEN = true)
+{
+    router.use(authentication)
+}
 
-
-router.use(authentication)
 // logout api
 router.post('/posting', asyncHanlder(PostController.updatePost))
 router.post('/allpost', asyncHanlder(PostController.getAllPost))
