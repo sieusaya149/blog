@@ -29,7 +29,7 @@ class Database
         const MYSQL_USER = process.env.MYSQL_USER
         const MYSQL_PASSWORD = process.env.MYSQL_PASSWORD
         const MYSQL_DATABASE = process.env.MYSQL_DATABASE
-        console.log(`Connect to MYSQL ${MYSQL_USER}@${MYSQL_HOST}:${MYSQL_PORT} with ${MYSQL_PASSWORD} to DB ${MYSQL_DATABASE}}`)
+        //console.log(`Connect to MYSQL ${MYSQL_USER}@${MYSQL_HOST}:${MYSQL_PORT} with ${MYSQL_PASSWORD} to DB ${MYSQL_DATABASE}}`)
         const connection = mysql.createConnection({host: MYSQL_HOST || 'mysql',
                                                   user: MYSQL_USER || 'hunghoang',
                                                   password: MYSQL_PASSWORD || '123',
@@ -59,7 +59,7 @@ class Database
 
     executeQueryV2(query, params) {
       return new Promise((resolve, reject) => {
-        connection.query(query, params, (error, results) => {
+        this.connection.query(query, params, (error, results) => {
           if (error) {
             reject(error);
           } else {

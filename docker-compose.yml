@@ -8,13 +8,16 @@ services:
       ports: 
         - 3000:3000
       container_name: backend
+      volumes: 
+        - .:/app
+        - '/app/node_modules'
       depends_on: 
         - mysql
       networks:
         mysql-phpmyadmin:
           aliases:
           - backend
-      command: sh -c "sleep 30 && node server.js"
+      command: sh -c "sleep 30 && npm run dev"
 
     mysql:
       image: mysql:8.0
