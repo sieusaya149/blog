@@ -9,7 +9,7 @@ require('dotenv').config()
 app.use(morgan("common"))
 // 2. helmet for protect info package http
 // that helping CROS attack, so if test in local please comment it
-app.use(helmet())
+// app.use(helmet())
 // 3. compression reduce the size of package
 app.use(compress())
 
