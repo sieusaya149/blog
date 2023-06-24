@@ -3,6 +3,7 @@ const morgan = require ('morgan')
 const helmet = require ('helmet')
 const compress = require ('compression')
 const app = express()
+app.use(cors());
 require('dotenv').config()
 //A. init middeware
 // 1. logging for server using morgan has 5 types (dev, combined, common, short, tiny)
@@ -13,11 +14,7 @@ app.use(morgan("common"))
 // 3. compression reduce the size of package
 app.use(compress())
 
-app.all('/', function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    next()
-  });
+
 
 app.use(express.json())
 app.use(express.urlencoded({extends: true}))
