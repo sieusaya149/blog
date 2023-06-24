@@ -51,6 +51,10 @@ class PostService
             throw new AuthFailureError("Category name Invalid")
         }
         const postIdNew = await PostData.insertPostToDb(postTitle, postStatus, postPermit, summarize, postContent, userId, categoryData.categroryId)
+        if(postIdNew == null)
+        {
+            throw new AuthFailureError("Can Not Create New Post")
+        }
         return {
             code: 200,
             metadata:{
