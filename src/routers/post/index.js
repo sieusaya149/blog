@@ -6,7 +6,7 @@ const {asyncHanlder} = require('../../helpers/asyncHandler')
 const { authentication } = require('../../auth/authUtils')
 const PostController = require('../../controllers/post.controller')
 require('dotenv').config()
-if(process.env.OFF_AUTHEN = true)
+if(process.env.OFF_AUTHEN == true)
 {
     router.use(authentication)
 }
