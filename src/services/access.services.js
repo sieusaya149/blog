@@ -74,7 +74,10 @@ class AccessService
         {
             throw new BadRequestError("Error: Issue in DB when register")
         }
-        
+        if(password == undefined)
+        {
+            throw new BadRequestError("Error: Please provide more information ")
+        }
         const match = bcrypt.compare(password, userInstance.password)
         if(!match)
         {

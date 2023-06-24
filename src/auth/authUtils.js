@@ -78,7 +78,7 @@ const authentication = asyncHanlder(async (req, res, next) => {
        next()
 
    } catch (error) {
-       console.log(error)
+        throw new AuthFailureError("Is there something wrong when verify key")
    }
 
 })
