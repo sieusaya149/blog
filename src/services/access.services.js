@@ -44,16 +44,13 @@ class AccessService
                                                               newUser)
             console.log(`The new key has been added ${newKey}`)
             return {
-                code: 201,
-                metadata:{
                     newUserId: newUser,
                     newTokens:{
                         publicKey: publicKey,
                         accessKey: tokens.accessToken,
                         refreshKey: tokens.refreshToken
                     }
-                }
-            }                                     
+                    }                                
         }
         throw new BadRequestError("Error: Issue when create new user and keystore")       
     }
@@ -72,16 +69,16 @@ class AccessService
         // for case db has problem
         if(userInstance == null)
         {
-            throw new BadRequestError("Error: Issue in DB when register")
+            throw new BadRequestError("Fobbiden: Issue in DB when register") //403
         }
         if(password == undefined)
         {
-            throw new BadRequestError("Error: Please provide more information ")
+            throw new BadRequestError("Fobbiden: Please provide more information ") //403
         }
-        const match = bcrypt.compare(password, userInstance.password)
+        const match = await bcrypt.compare(password, userInstance.password)
         if(!match)
         {
-            throw new AuthFailureError("Authentication Failed")
+            throw new AuthFailureError("Authentication Failed") // 400
         }
 
         const publicKey = crypto.randomBytes(64).toString('hex')
@@ -99,16 +96,13 @@ class AccessService
                                                          instanceId)
         console.log(`The new key has been added ${newKey}`)
         return {
-            code: 201,
-            metadata:{
                 userId: instanceId,
-                newTokens:{
-                    publicKey: publicKey,
-                    accessKey: tokens.accessToken,
-                    refreshKey: tokens.refreshToken
-                }
-            }
-        }                                     
+                    newTokens:{
+                        publicKey: publicKey,
+                        accessKey: tokens.accessToken,
+                        refreshKey: tokens.refreshToken
+                    }
+                }                                     
     }
     
     static logout = async (keyStore) =>{

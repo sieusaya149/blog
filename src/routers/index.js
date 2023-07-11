@@ -9,9 +9,8 @@ const router = express.Router()
 // 2. check permission
 // router.use(permission('0000'))
 router.use('/v1/api', require("./access"))
-router.use('/v1/upload', require("./upload"))
-router.use('/uploads',require("./upload"))
-router.use('/post',require("./post"))
-router.use('/user',require("./userInfor"))
+router.use('/v1/api/upload', require("./upload"))
+router.use('/v1/api/post',require("./post"))
+router.use('/v1/api/user',require("./userInfor"))
 
 module.exports = router
