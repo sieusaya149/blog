@@ -2,11 +2,6 @@ const JWT = require('jsonwebtoken')
 const instanceMySqlDB = require('../dbs/init.mysql')
 const {asyncHanlder} = require('../helpers/asyncHandler')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
-const HEADER = {
-    API_KEY : 'x-api-key',
-    AUTHORIZATION : 'authorization',
-    CLIENT_ID: 'x-client-id',
-}
 
 // FIX me because currently in the source code, the keys are not key pair
 // so that we only use private key
@@ -45,8 +40,8 @@ const authentication = asyncHanlder(async (req, res, next) => {
         5. check keyStore with user
         6. oke all => return next()
     */
-   const userId = req.headers[HEADER.CLIENT_ID]
 
+   const {accessToken, userId} = req.cookies
    //1
    if(!userId)
    {
@@ -60,7 +55,6 @@ const authentication = asyncHanlder(async (req, res, next) => {
        throw new BadRequestError('Not Found User Id')
    }
    //3
-   const accessToken = req.headers[HEADER.AUTHORIZATION]
    if(!accessToken)
    {
        throw new AuthFailureError("Invalid authorization")

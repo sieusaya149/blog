@@ -5,7 +5,7 @@ const {OK, CREATED} = require('../core/success.response')
 const AccessService = require('../services/access.services')
 class AccessController
 {
-    // @POST http://localhost:3055/v1/api/auth/signUp
+    // @POST http://localhost:3055/v1/api/auth/signup
     signUp = async (req, res, next) => {
         new CREATED({
             message: "Registered Success!",
@@ -14,19 +14,22 @@ class AccessController
     }
     // @POST http://localhost:3055/v1/api/auth/login
     login = async (req, res, next) => {
-        new CREATED({
+        const {metaData, cookies} = await AccessService.login(req.body)
+        const msg = new CREATED({
             message: "Login Success!",
-            metaData: await AccessService.login(req.body)
-        }).send(res)
+            metaData: metaData,
+            cookies: cookies
+        })
+        msg.sendWithCookies(res)
     }
 
     // @POST http://localhost:3055/v1/api/auth/logout
     logout = async (req, res, next) => {
-        console.log("starting logout ")
-        new CREATED({
+        const msg = new CREATED({
             message: "Logout Success!",
             metaData: await AccessService.logout(req.keyStore)
-        }).send(res)
+        })
+        msg.sendWithResetCookies(res)
     }
 }
 

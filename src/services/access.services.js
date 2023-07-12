@@ -95,14 +95,15 @@ class AccessService
                                                          "{}",
                                                          instanceId)
         console.log(`The new key has been added ${newKey}`)
-        return {
-                userId: instanceId,
-                    newTokens:{
-                        publicKey: publicKey,
-                        accessKey: tokens.accessToken,
-                        refreshKey: tokens.refreshToken
-                    }
-                }                                     
+        const metaData = {userId: instanceId,
+                          newTokens: {accessKey: tokens.accessToken,
+                                      refreshKey: tokens.refreshToken}
+                         }
+        const cookies = { accessToken: tokens.accessToken,
+                          refreshToken: tokens.refreshToken,
+                          userId: instanceId} 
+        
+        return {metaData, cookies}
     }
     
     static logout = async (keyStore) =>{

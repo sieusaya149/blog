@@ -16,13 +16,15 @@ class SuccessResponse {
             message,
             statusCode = StatusCode.OK, 
             reasonCode = ReasonCode.OK,
-            metaData = {}
+            metaData = {},
+            cookies = {}
         }
     )
     {
         this.message = !message ? reasonCode : message
         this.status = statusCode
-        this.metaData = metaData    
+        this.metaData = metaData
+        this.cookies = cookies 
     }
 
     send (res, headers = {})
@@ -33,6 +35,23 @@ class SuccessResponse {
     sendFile (res, filename)
     {
         return res.sendFile(filename)
+    }
+
+    sendWithCookies(res)
+    {
+        for (const property in this.cookies)
+        {
+            res.cookie(`${property}`, this.cookies[property], { httpOnly: true, secure: true });
+        }
+        return res.status(this.status).json(this)
+    }
+
+    sendWithResetCookies(res)
+    {
+        res.clearCookie('accessToken')
+        res.clearCookie('refreshToken')
+        res.clearCookie('userId')
+        return res.status(this.status).json(this)
     }
 }
 
@@ -45,9 +64,9 @@ class OK extends SuccessResponse{
 }
 
 class CREATED extends SuccessResponse{
-    constructor({message, statusCode = StatusCode.CREATED, reasonCode = ReasonCode.CREATED, metaData})
+    constructor({message, statusCode = StatusCode.CREATED, reasonCode = ReasonCode.CREATED, metaData, cookies})
     {
-        super({message, statusCode, reasonCode, metaData})
+        super({message, statusCode, reasonCode, metaData, cookies})
     }
 }
 
