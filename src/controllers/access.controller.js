@@ -29,7 +29,38 @@ class AccessController
             message: "Logout Success!",
             metaData: await AccessService.logout(req.keyStore)
         })
-        msg.sendWithResetCookies(res)
+        msg.sendWithResetCookiesAfterLogout(res)
+    }
+
+    // @POST http://localhost:3055/v1/api/auth/forgot-password
+    forgotPassword = async (req, res, next) => {
+        const {metaData, cookies} = await AccessService.forgotPassword(req)
+        const msg = new OK({
+            message: "Sent Mail Successful",
+            metaData: metaData,
+            cookies: cookies
+        })
+        msg.sendWithCookies(res)
+    }
+    // @POST http://localhost:3055/v1/api/auth/forgot-password/:verifyCode
+    forgotPasswordVerify = async (req, res, next) => {
+        const {metaData, cookies} = await AccessService.forgotPasswordVerify(req)
+        const msg = new OK({
+            message: "You Can Change New Password",
+            metaData: metaData,
+            cookies: cookies
+        })
+        msg.sendWithCookies(res)
+    }
+    // @POST http://localhost:3055/v1/api/auth/reset-password
+    resetPassword = async(req, res, next) => {
+        const {metaData, cookies} = await AccessService.resetPassword(req)
+        const msg = new OK({
+            message: "updated new password",
+            metaData: metaData,
+            cookies: cookies
+        })
+        msg.sendWithResetCookiesAfterResetPassword(res)
     }
 }
 

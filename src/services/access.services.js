@@ -1,9 +1,13 @@
 const instanceMySqlDB = require('../dbs/init.mysql')
+const UserQuery  = require('../dbs/user.mysql')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const {createTokenPair} = require("../auth/authUtils")
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
-const { access } = require('fs')
+const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
+const {generateVerificationCode} = require('../helpers/randomCode')
+const mailTransport = require('../helpers/mailHelper')
+const {TIMEOUT} = require('../configs/configurations')
 class AccessService
 {
     //1. Check username and email does not exist in the database
@@ -12,7 +16,7 @@ class AccessService
     //4. Create token pairs by publickey and privatekey
     //5. Store the pub, pri, accesstoken, refreshtoken 
     static signUp = async ({username, email, password, birth}) => {
-        const exist = await instanceMySqlDB.checkUserExist(username,email)
+        const exist = await UserQuery.checkUserExist(username,email)
         // for case db has problem
         if(exist == null)
         {
@@ -112,6 +116,76 @@ class AccessService
         const delKey = await instanceMySqlDB.deleteKeyStore(keyStore.userId)
         console.log(`${delKey}`)
         return delKey
+    }
+
+    static forgotPassword = async (req) => {
+        //1. check mail exist or not in body
+        const email = req.body.email
+        if(!email)
+        {
+            throw new BadRequestError("Please Fill Email") //403
+        }
+        //2. check mail exist or not in the db
+        const userExist = await UserQuery.getUserFromMail(email)
+        if(!userExist)
+        {
+            throw new BadRequestError("The email does not register yet") //403
+        }
+        //3. create new token
+        // Generate a unique token
+        const code = generateVerificationCode()
+        const codeExpiry = Date.now() +  TIMEOUT.verifyCode; // Token expires in 1 hour
+        console.log(`code is ${code}`)
+        await VerifyCodeQuery.createNewVerifyCode(code, codeExpiry, userExist.userId)
+        mailTransport.send(email,'reset code', code)
+        const cookies = { userId: userExist.userId } 
+        const metaData = {
+            link:"http://localhost:3000/v1/api/auth//auth/forgot-password/:id"
+        }
+       return {metaData, cookies}
+    }
+
+    static forgotPasswordVerify = async (req) => {
+        const code = req.params.verifyCode
+        const userId = req.cookies.userId
+        const metaData = {}
+        const cookies = {}
+        const existingCode = await VerifyCodeQuery.checkCodeExistOrNot(code, userId)
+        if(existingCode != null)
+        {
+            cookies.verifyCode = code
+        }
+        else
+        {
+            throw new BadRequestError("Incorrect Code Please Fill Again")
+        }
+        
+        return {metaData, cookies}
+    }
+
+    static resetPassword = async (req) => {
+        // check password new and confirm exist
+        const userId = req.cookies.userId
+        const verifyCode = req.cookies.verifyCode
+        const {newPassword, confirmPassword} = req.body
+        if(!newPassword || !confirmPassword)
+        {
+            throw new BadRequestError('Not enough information request')
+        }
+        // check password new and confirm matched
+        if(newPassword !== confirmPassword)
+        {
+            throw new BadRequestError('Both Password does not match together')
+        }
+
+        const passwordHashed = await bcrypt.hash(newPassword, 10)
+        try {
+            await UserQuery.updatePassword(passwordHashed, userId)
+            await VerifyCodeQuery.deleteVerifyCode(verifyCode, userId)
+        } catch (error) {
+            throw new BadRequestError('Update password is not successful')
+        }
+        return "Update Password Success"
     }
 }
 

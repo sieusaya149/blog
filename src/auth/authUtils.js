@@ -2,7 +2,7 @@ const JWT = require('jsonwebtoken')
 const instanceMySqlDB = require('../dbs/init.mysql')
 const {asyncHanlder} = require('../helpers/asyncHandler')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
-
+const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 // FIX me because currently in the source code, the keys are not key pair
 // so that we only use private key
 const createTokenPair = async (payload, publicKey, privateKey) => {
@@ -77,4 +77,26 @@ const authentication = asyncHanlder(async (req, res, next) => {
 
 })
 
-module.exports = {createTokenPair, authentication}
+// verify code and userId before reset password
+const verifyResetPassword = asyncHanlder(async (req, res, next) => {
+    const {userId, verifyCode} = req.cookies
+    if(!userId || !verifyCode) 
+    {
+       throw new BadRequestError('Please provide more input data')
+    }
+    // verify code should be exist in db
+    const codeExisting = await VerifyCodeQuery.checkCodeExistOrNot(verifyCode, userId)
+   
+    if(codeExisting == null)
+    {
+        throw new AuthFailureError("Not correct Code or userID")
+    }
+    if(codeExisting.expireTime < Date.now())
+    {
+        throw new BadRequestError(`The verify code timeout ${codeExisting.expireTime} < ${new Date(Date.now())}`)
+    }
+    
+    next()
+})
+
+module.exports = {createTokenPair, authentication, verifyResetPassword}

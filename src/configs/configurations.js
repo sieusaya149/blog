@@ -88,12 +88,27 @@ const DB_QUERYs = {
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
                         FOREIGN KEY (postId) REFERENCES POST(postId),\
-                        FOREIGN KEY (userId) REFERENCES USER(userId));"
+                        FOREIGN KEY (userId) REFERENCES USER(userId));",
+
+    CREATE_VERIFY_CODE_TABLE:  "CREATE TABLE IF NOT EXISTS VERIFYCODE(\
+                                    codeId CHAR(36),\
+                                    code VARCHAR(255) UNIQUE NOT NULL,\
+                                    expireTime TIMESTAMP NOT NULL, \
+                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                    userId CHAR(36),\
+                                    PRIMARY KEY(codeId),\
+                                    FOREIGN KEY (userId) REFERENCES USER(userId)\
+                                );"
 }
 
 const API = {
     API_KEY: "8da9be05-6d98-4c2f-ab9e-f1e76a43af01"
 }
 
+const TIMEOUT = {
+    verifyCode : 60 * 60  *  1000
+}
 
-module.exports = { DB_QUERYs}
+
+module.exports = { DB_QUERYs, TIMEOUT}

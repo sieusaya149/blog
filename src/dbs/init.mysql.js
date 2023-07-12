@@ -20,6 +20,7 @@ class Database
             this.executeQuery(DB_QUERYs.CREATE_POSTCATEGORY_TABLE, "CREATE_POSTCATEGORY_TABLE");
             this.executeQuery(DB_QUERYs.CREATE_IMAGE_TABLE, "CREATE_IMAGE_TABLE");
             this.executeQuery(DB_QUERYs.CREATE_KEY_STORE_TABLE, "CREATE_KEY_STORE_TABLE");
+            this.executeQuery(DB_QUERYs.CREATE_VERIFY_CODE_TABLE,"CREATE_VERIFY_CODE_TABLE")
         }
     }
      connect()

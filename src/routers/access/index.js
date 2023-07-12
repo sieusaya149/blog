@@ -4,16 +4,20 @@ const express = require('express')
 const router = express.Router()
 const {asyncHanlder} = require('../../helpers/asyncHandler')
 const accessController = require('../../controllers/access.controller')
-const { authentication } = require('../../auth/authUtils')
+const { authentication, verifyResetPassword } = require('../../auth/authUtils')
 require('dotenv').config()
-// signup api
-router.post('/auth/signup', asyncHanlder(accessController.signUp))
-router.post('/auth/login', asyncHanlder(accessController.login))
+// signup
+router.post('/signup', asyncHanlder(accessController.signUp))
+//login
+router.post('/login', asyncHanlder(accessController.login))
+// forgot password
+router.post('/forgot-password/:verifyCode', asyncHanlder(accessController.forgotPasswordVerify))
+router.post('/forgot-password', asyncHanlder(accessController.forgotPassword))
+router.post('/reset-password', verifyResetPassword, asyncHanlder(accessController.resetPassword))
 
 router.use(authentication)
-
-// logout api
-router.post('/auth/logout', asyncHanlder(accessController.logout))
+// logout
+router.post('/logout', asyncHanlder(accessController.logout))
 
 
 module.exports = router

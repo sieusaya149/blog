@@ -1,7 +1,7 @@
 const instanceMySqlDB = require('./init.mysql');
 const { post } = require('../routers');
 const { v4: uuidv4 } = require('uuid');
-class PostData {
+class PostQuery {
     constructor()
     {
         this.dbInstance = instanceMySqlDB
@@ -72,4 +72,4 @@ class PostData {
     }
 }
 
-module.exports = new PostData()
+module.exports = new PostQuery()

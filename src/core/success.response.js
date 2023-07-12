@@ -45,21 +45,28 @@ class SuccessResponse {
         }
         return res.status(this.status).json(this)
     }
-
-    sendWithResetCookies(res)
+    // FIXME should have the way clear cookies that easy to understand more
+    sendWithResetCookiesAfterLogout(res)
     {
         res.clearCookie('accessToken')
         res.clearCookie('refreshToken')
         res.clearCookie('userId')
-        return res.status(this.status).json(this)
+        return this.send(res)
+    }
+    // FIXME should have the way clear cookies that easy to understand more
+    sendWithResetCookiesAfterResetPassword(res)
+    {
+        res.clearCookie('verifyCode')
+        res.clearCookie('userId')
+        return this.send(res)
     }
 }
 
 
 class OK extends SuccessResponse{
-    constructor({message, metaData})
+    constructor({message, metaData, cookies})
     {
-        super({message, metaData})
+        super({message, metaData, cookies})
     }
 }
 
