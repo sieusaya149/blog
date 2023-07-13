@@ -49,7 +49,7 @@ const authentication = asyncHanlder(async (req, res, next) => {
    }
    //2
    const keyStore = await instanceMySqlDB.getKeyStore(userId)
-   console.log(`Key store maybe is ${keyStore}`)
+//    console.log(`Key store maybe is ${keyStore}`)
    if(keyStore == null)
    {
        throw new BadRequestError('Not Found User Id')
@@ -61,14 +61,14 @@ const authentication = asyncHanlder(async (req, res, next) => {
    }
 
    try {
-       console.log(`public key ${keyStore.publicKey} and private key ${keyStore.privateKey}`)
+    //    console.log(`public key ${keyStore.publicKey} and private key ${keyStore.privateKey}`)
        const decodeUser = JWT.verify(accessToken, keyStore.privateKey)
        if(userId !== decodeUser.userId)
        {
             throw new AuthFailureError("Can not verify key")
        }
        req.keyStore = keyStore
-       console.log(keyStore)
+    //    console.log(keyStore)
        next()
 
    } catch (error) {
