@@ -20,7 +20,11 @@ class Database
             this.executeQuery(DB_QUERYs.CREATE_POSTCATEGORY_TABLE, "CREATE_POSTCATEGORY_TABLE");
             this.executeQuery(DB_QUERYs.CREATE_IMAGE_TABLE, "CREATE_IMAGE_TABLE");
             this.executeQuery(DB_QUERYs.CREATE_KEY_STORE_TABLE, "CREATE_KEY_STORE_TABLE");
-            this.executeQuery(DB_QUERYs.CREATE_VERIFY_CODE_TABLE,"CREATE_VERIFY_CODE_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_COMMENT_TABLE, "CREATE_COMMENT_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_LIKE_EMOTION_TABLE, "CREATE_LIKE_EMOTION_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_FOLLOW_LIST_TABLE, "CREATE_FOLLOW_LIST_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_SAVELIST_TABLE, "CREATE_SAVELIST_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_SAVELIST_POST_TABLE, "CREATE_SAVELIST_POST_TABLE")
         }
     }
      connect()
@@ -107,7 +111,7 @@ class Database
 
     async getKeyStore(userId)
     {
-      console.log(`userid ${userId}`)
+      // console.log(`userid ${userId}`)
       try {
         const query = 'SELECT * FROM KEYSTORE WHERE userId = ? ';
         const result = await this.executeQueryV2(query, [userId]);
@@ -191,17 +195,7 @@ class Database
       }
     }
 
-    async getCategory(categroryName)
-    {
-      try {
-        const query = 'SELECT * FROM CATEGORY WHERE categroryName = ? ';
-        const result = await this.executeQueryV2(query, [categroryName]);
-        return result.length > 0? result[0]: null;
-      }
-      catch (error) {
-        return null
-      }
-    }
+    
 }
 
 const instanceMySqlDB = Database.getInstance()
