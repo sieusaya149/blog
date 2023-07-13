@@ -5,13 +5,66 @@ const {OK, CREATED} = require('../core/success.response')
 const PostService = require('../services/post.services')
 class PostController
 {
-    // POST http://localhost:3055/post/posting
-    updatePost = async (req, res, next) => {
-        const imageFile = 
-        new CREATED({
+    publishPost = async (req, res, next) => {
+        const metaData = await PostService.publishPost(req)
+        const msg = new OK({
             message: "Update new Post Success!",
-            metaData: await PostService.updatePost(req)
-        }).send(res)
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+    rePublishPost = async (req, res, next) => {
+        const metaData = await PostService.rePublishPost(req)
+        const msg = new OK({
+            message: "RePublish Post Success",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    unpublishPost = async (req, res, next) => {
+        const metaData = await PostService.unpublishPost(req)
+        const msg = new OK({
+            message: "Unpublish Post Success",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    readSinglePost = async (req, res, next) => {
+        const {metaData} = await PostService.readSinglePost(req)
+        const msg = new OK({
+            message: "Read Success",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    editPost = async (req, res, next) => {
+        const {metaData} = await PostService.editPost(req)
+        const msg = new OK({
+            message: "Edit Successfull",
+            metaData: metaData
+        })
+        msg.send(res)
+    }    
+
+    commentPost = async (req, res, next) => {
+        const {metaData} = await PostService.commentPost(req)
+        const msg = new OK({
+            message: "Comment Successful",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    likePost = async (req, res, next) => {
+        const {metaData} = await PostService.likePost(req)
+        const msg = new OK({
+            message: "Update Like Post Successful",
+            metaData: metaData
+        })
+        msg.send(res)
     }
     // POST http://localhost:3055/post/postId
     getPost = async (req, res, next) => {

@@ -6,13 +6,34 @@ const {asyncHanlder} = require('../../helpers/asyncHandler')
 const { authentication } = require('../../auth/authUtils')
 const PostController = require('../../controllers/post.controller')
 require('dotenv').config()
-if(process.env.OFF_AUTHEN == true)
-{
-    router.use(authentication)
-}
+
+router.use(authentication)
+
 
 // logout api
-router.post('/posting', asyncHanlder(PostController.updatePost))
+router.post('/publish', asyncHanlder(PostController.publishPost))
+router.put('/republish/:postId', asyncHanlder(PostController.rePublishPost))
+router.put('/unpublish/:postId', asyncHanlder(PostController.unpublishPost))
+router.get('/read/:postId', asyncHanlder(PostController.readSinglePost))
+// FIXME the categrory can be multiple value, how to edit
+router.put('/edit/:postId', asyncHanlder(PostController.editPost))
+// router.post('/delete/:postId', asyncHanlder(PostController.editComment))
+// FIXME the comment just is basic, in the future hard to development, should spend time refactor
+router.post('/comment/:postId', asyncHanlder(PostController.commentPost))
+// I think edit comment, should be in another request, many thing to edit? maybe delete
+// router.post('/edit-comment/:commendId', asyncHanlder(PostController.editComment))
+// router.post('/delete/:commendId', asyncHanlder(PostController.editComment))
+
+router.post('/like/:postId', asyncHanlder(PostController.likePost))
+// router.post('/save-change/:postId', asyncHanlder(PostController.updatePost)) // save in draf style
+// router.post('/delta/:postId', asyncHanlder(PostController.updatePost))
+// router.post('/add-reading-list/:postId', asyncHanlder(PostController.updatePost))
+
+
+
+
+
+
 router.post('/allpost', asyncHanlder(PostController.getAllPost))
 
 router.get('/:postId', asyncHanlder(PostController.getPost))
