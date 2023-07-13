@@ -15,17 +15,15 @@ const DB_QUERYs = {
     CREATE_POST_TABLE : "CREATE TABLE IF NOT EXISTS POST(\
                         postId CHAR(36),\
                         title VARCHAR(1500) NOT NULL,\
-                        statusEdit ENUM('draf', 'publish', 'unpublist') DEFAULT 'draf',\
+                        statusEdit ENUM('draft', 'publish', 'unpublish') DEFAULT 'draft',\
                         sharePermission ENUM('private', 'follower', 'public'),\
                         summarize TEXT NOT NULL,\
                         content LONGTEXT NOT NULL,\
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
                         userId CHAR(36),\
-                        categroryId CHAR(36),\
                         PRIMARY KEY (postId),\
-                        FOREIGN KEY (userId) REFERENCES USER(userId),\
-                        FOREIGN KEY (categroryId) REFERENCES CATEGORY(categroryId));",
+                        FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
     
     CREATE_CATEGORY_TABLE: "CREATE TABLE IF NOT EXISTS CATEGORY(\
                             categroryId CHAR(36),\
@@ -46,16 +44,16 @@ const DB_QUERYs = {
                             postId CHAR(36),\
                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
-                            FOREIGN KEY (tagId) REFERENCES TAG(tagId),\
-                            FOREIGN KEY (postId) REFERENCES POST(postId));",
+                            FOREIGN KEY (tagId) REFERENCES TAG(tagId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                            FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE);",
 
     CREATE_POSTCATEGORY_TABLE: "CREATE TABLE IF NOT EXISTS POSTCATEGORY(\
                                 categroryId CHAR(36),\
                                 postId CHAR(36),\
                                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
                                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
-                                FOREIGN KEY (categroryId) REFERENCES CATEGORY(categroryId),\
-                                FOREIGN KEY (postId) REFERENCES POST(postId));",
+                                FOREIGN KEY (categroryId) REFERENCES CATEGORY(categroryId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE);",
     
     CREATE_APIKEY_TABLE : "CREATE TABLE IF NOT EXISTS APIKEY(\
                             id int AUTO_INCREMENT PRIMARY KEY,\
@@ -77,7 +75,7 @@ const DB_QUERYs = {
                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
                             userId CHAR(36),\
                             PRIMARY KEY(keyStoreId),\
-                            FOREIGN KEY (userId) REFERENCES USER(userId));",
+                            FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE);",
     
     CREATE_IMAGE_TABLE: "CREATE TABLE IF NOT EXISTS IMAGE(\
                         imageId CHAR(36),\
@@ -87,8 +85,8 @@ const DB_QUERYs = {
                         userId CHAR(36),\
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
-                        FOREIGN KEY (postId) REFERENCES POST(postId),\
-                        FOREIGN KEY (userId) REFERENCES USER(userId));",
+                        FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                        FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
 
     CREATE_VERIFY_CODE_TABLE:  "CREATE TABLE IF NOT EXISTS VERIFYCODE(\
                                     codeId CHAR(36),\
@@ -98,8 +96,58 @@ const DB_QUERYs = {
                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
                                     userId CHAR(36),\
                                     PRIMARY KEY(codeId),\
-                                    FOREIGN KEY (userId) REFERENCES USER(userId)\
-                                );"
+                                    FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE) ON UPDATE CASCADE;",
+
+    CREATE_FOLLOW_LIST_TABLE:   "CREATE TABLE IF NOT EXISTS FOLLOW_LIST(\
+                                    followingId CHAR(36) NOT NULL,\
+                                    followerId CHAR(36) NOT NULL,\
+                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                    FOREIGN KEY (followingId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (followerId) REFERENCES USER(userId)ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    CONSTRAINT uc_follow UNIQUE (followingId, followerId));",
+                                
+    CREATE_COMMENT_TABLE:           "CREATE TABLE IF NOT EXISTS COMMENT(\
+                                    commentId CHAR(36) NOT NULL,\
+                                    commentText TEXT NOT NULL,\
+                                    userId CHAR(36) NOT NULL,\
+                                    postId CHAR(36) NOT NULL,\
+                                    parentCommentId CHAR(36) DEFAULT NULL,\
+                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                    PRIMARY KEY(commentId),\
+                                    FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (parentCommentId) REFERENCES COMMENT(commentId) ON DELETE CASCADE ON UPDATE CASCADE);",
+
+    CREATE_LIKE_EMOTION_TABLE:      "CREATE TABLE IF NOT EXISTS LIKE_EMOTION(\
+                                    likeId CHAR(36) NOT NULL,\
+                                    userId CHAR(36) NOT NULL,\
+                                    postId CHAR(36) DEFAULT NULL,\
+                                    commentId CHAR(36) DEFAULT NULL,\
+                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                    PRIMARY KEY(likeId),\
+                                    FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (commentId) REFERENCES COMMENT(commentId) ON DELETE CASCADE ON UPDATE CASCADE);",
+
+    CREATE_SAVELIST_TABLE:              "CREATE TABLE IF NOT EXISTS SAVELIST(\
+                                        saveListId CHAR(36) NOT NULL,\
+                                        nameSaveList VARCHAR(500) DEFAULT 'NO NAME',\
+                                        userId CHAR(36) NOT NULL,\
+                                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                        PRIMARY KEY (saveListId),\
+                                        FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
+                                    
+    CREATE_SAVELIST_POST_TABLE:        "CREATE TABLE IF NOT EXISTS SAVELIST_POST(\
+                                        saveListId CHAR(36) NOT NULL,\
+                                        postId CHAR(36) NOT NULL,\
+                                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                        FOREIGN KEY (saveListId) REFERENCES SAVELIST(saveListId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                        FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE);"
 }
 
 const API = {
@@ -110,5 +158,11 @@ const TIMEOUT = {
     verifyCode : 60 * 60  *  1000
 }
 
+const ALLOW_DATA = {
+    post: {
+        statusEdit: ['publish', 'unpublish', 'draft'],
+        sharePermission: ['private', 'follower', 'public']
+    }
+}
 
-module.exports = { DB_QUERYs, TIMEOUT}
+module.exports = { DB_QUERYs, TIMEOUT, ALLOW_DATA}
