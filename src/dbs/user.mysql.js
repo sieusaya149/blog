@@ -56,7 +56,17 @@ class UserQuery {
           console.error(error);
           return null;
         }
-      }
+    }
+
+    // adding user to database
+    async addUser(username, email, password, birthDay) {
+        // we have 2 query, first for inserting, the second for getting the lastest id that
+        // was inserted
+        const query = 'INSERT INTO USER (userId, userName, email, password, birthDay) VALUES (UUID(), ?, ?, ?, ?)';
+        await this.dbInstance.executeQueryV2(query, [username, email, password, birthDay]);
+        const newUser = await this.getUserFromMail(email)
+        return newUser.userId
+    }
 }
 
 module.exports = new UserQuery()

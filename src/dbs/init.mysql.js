@@ -121,21 +121,7 @@ class Database
         return null
       }
     }
-    // adding user to database
-    async addUser(username, email, password, birthDay) {
-      try {
-        // we have 2 query, first for inserting, the second for getting the lastest id that
-        // was inserted
-        const query = 'INSERT INTO USER (userId, userName, email, password, birthDay) VALUES (UUID(), ?, ?, ?, ?)';
-        await this.executeQueryV2(query, [username, email, password, birthDay]);
-        const getUserIdQuery = 'SELECT userId FROM USER WHERE userName = ?';
-        const userIdResult = await this.executeQueryV2(getUserIdQuery, [username]);
-        return userIdResult[0].userId;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    }
+    
    
 
     //adding new keystore to database
@@ -163,7 +149,6 @@ class Database
     // }
 
     async addKeyStore(publicKey, privateKey, accessToken, refreshToken, refreshTokenUsed, userId) {
-      try {
         await this.deleteKeyStore(userId)
         console.log(`Insert new keystore for user ${userId}`)
         const insertQuery = `INSERT INTO KEYSTORE (keyStoreId, publicKey, privateKey, accessToken, refreshToken, refreshTokenUsed, userId)
@@ -173,14 +158,9 @@ class Database
         const getKeyIdQuery = 'SELECT LAST_INSERT_ID() as keyStoreId';
         const keyIdResult = await this.executeQueryV2(getKeyIdQuery);
         return keyIdResult[0].id;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
     }
 
     async deleteKeyStore(userId) {
-      try {
         const checkQuery = 'SELECT 1 FROM KEYSTORE WHERE userId = ?';
         const checkResults = await this.executeQueryV2(checkQuery, [userId]);
         if (checkResults.length > 0)
@@ -189,10 +169,6 @@ class Database
           const deleteQuery = `DELETE FROM KEYSTORE WHERE userId = ?`;
           await this.executeQueryV2(deleteQuery, [userId]);
         }
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
     }
 
     

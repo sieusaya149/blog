@@ -8,6 +8,7 @@ const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT} = require('../configs/configurations')
+const TransactionQuery = require('../dbs/transaction.mysql')
 class AccessService
 {
     //1. Check username and email does not exist in the database
@@ -30,33 +31,31 @@ class AccessService
         
         const passwordHashed = await bcrypt.hash(password, 10)
 
-        const newUser = await instanceMySqlDB.addUser(username, email, passwordHashed, birth)
-        console.log(`Adding new user successfull with id ${newUser}`)
-
-        if(newUser != null )
-        {
+        TransactionQuery.startTransaction()
+        try {
+            const newUser = await UserQuery.addUser(username, email, passwordHashed, birth)
             const publicKey = crypto.randomBytes(64).toString('hex')
             const privateKey = crypto.randomBytes(64).toString('hex')
             const tokens = await createTokenPair({userId: newUser, email: email},
                                                  publicKey,
                                                  privateKey)
             const newKey = await instanceMySqlDB.addKeyStore(publicKey,
-                                                              privateKey,
-                                                              tokens.accessToken,
-                                                              tokens.refreshToken,
-                                                              "{}",
-                                                              newUser)
-            console.log(`The new key has been added ${newKey}`)
-            return {
-                    newUserId: newUser,
-                    newTokens:{
+                                                            privateKey,
+                                                            tokens.accessToken,
+                                                            tokens.refreshToken,
+                                                            "{}",
+                                                            newUser)
+            TransactionQuery.commitTransaction()
+            return {newUserId: newUser,
+                    newTokens: {
                         publicKey: publicKey,
                         accessKey: tokens.accessToken,
                         refreshKey: tokens.refreshToken
-                    }
-                    }                                
-        }
-        throw new BadRequestError("Error: Issue when create new user and keystore")       
+                    }}  
+        } catch (error) {
+            TransactionQuery.rollBackTransaction()
+            throw new BadRequestError("Error: Issue when create new user and keystore")       
+        }           
     }
 
     /*
