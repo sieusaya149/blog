@@ -58,6 +58,15 @@ class PostController
         msg.send(res)
     }
 
+    deleteComment = async (req, res, next) => {
+        const {metaData} = await PostService.deleteComment(req)
+        const msg = new OK({
+            message: "Delete Comment Successful",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
     likePost = async (req, res, next) => {
         const {metaData} = await PostService.likePost(req)
         const msg = new OK({

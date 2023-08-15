@@ -96,7 +96,7 @@ const DB_QUERYs = {
                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
                                     userId CHAR(36),\
                                     PRIMARY KEY(codeId),\
-                                    FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE) ON UPDATE CASCADE;",
+                                    FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
 
     CREATE_FOLLOW_LIST_TABLE:   "CREATE TABLE IF NOT EXISTS FOLLOW_LIST(\
                                     followingId CHAR(36) NOT NULL,\

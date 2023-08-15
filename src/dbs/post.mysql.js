@@ -177,10 +177,9 @@ class PostQuery {
       }
       else
       {
-        const commendId = uuidv4();
         const query = "INSERT INTO COMMENT  (commentId, commentText, postId, userId, parentCommentId) \
-                       VALUES(?, ?, ?, ?, ?)"
-        const result = await this.dbInstance.executeQueryV2(query, [commendId, commentText, postId, userId, parentCommentId])
+                       VALUES(UUID(), ?, ?, ?, ?)"
+        const result = await this.dbInstance.executeQueryV2(query, [commentText, postId, userId, parentCommentId])
         if(result.affectedRows != 1)
         {
           throw new Error("Can not insert new comment")
@@ -212,6 +211,48 @@ class PostQuery {
         {
           throw new Error("Can not Like Post")
         }
+      }
+    }
+
+
+    async getCommentById(commentId)
+    {
+      try {
+        const getCommentSql = 'SELECT * FROM COMMENT WHERE commentId = ?';
+        const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [commentId]);
+        if(commentData.length == 1)
+        {
+          return commentData[0]
+        }
+        else
+        {
+          return null
+        }
+      }
+      catch (error) {
+        console.log(error)
+        return null
+      }
+    }
+
+    async deleteComment(commentId, userId)
+    {
+      try {
+        const deleteCommentSql = 'DELETE FROM COMMENT WHERE commentId = ?  and userId = ?';
+        const commentData = await this.dbInstance.executeQueryV2(deleteCommentSql, [commentId, userId]);
+        console.log(commentData)
+        if(commentData.affectedRows == 1)
+        {
+          return commentData
+        }
+        else
+        {
+          return null
+        }
+      }
+      catch (error) {
+        console.log(error)
+        return null
       }
     }
 }

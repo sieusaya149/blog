@@ -20,9 +20,7 @@ router.put('/edit/:postId', asyncHanlder(PostController.editPost))
 // router.post('/delete/:postId', asyncHanlder(PostController.editComment))
 // FIXME the comment just is basic, in the future hard to development, should spend time refactor
 router.post('/comment/:postId', asyncHanlder(PostController.commentPost))
-// I think edit comment, should be in another request, many thing to edit? maybe delete
-// router.post('/edit-comment/:commendId', asyncHanlder(PostController.editComment))
-// router.post('/delete/:commendId', asyncHanlder(PostController.editComment))
+router.delete('/delete/:commentId', asyncHanlder(PostController.deleteComment))
 
 router.post('/like/:postId', asyncHanlder(PostController.likePost))
 // router.post('/save-change/:postId', asyncHanlder(PostController.updatePost)) // save in draf style

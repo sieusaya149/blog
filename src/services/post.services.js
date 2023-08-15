@@ -168,12 +168,24 @@ class PostService
     }
 
     static commentPost = async(req) => {
-        const postId = req.params.postId
+        const postId = req.params.postId;
+        // commentId and parent comment Id might be null
+        const commentId = req.body.commentId;
+        const parentCommentId = req.body.parentCommentId;
         const comment = req.body.comment
         const userId = req.cookies.userId
         if(!postId || !comment || !userId)
         {
             throw new BadRequestError("Please give more infor")
+        }
+
+        if(parentCommentId)
+        {
+            const parentData = await PostQuery.getCommentById(parentCommentId)
+            if(parentData == null)
+            {
+                throw new BadRequestError(`parent comment with id ${parentCommentId} did not exist`)
+            }
         }
         const postData = await PostQuery.getPostByPostId(postId)
         if(postData == null)
@@ -181,7 +193,28 @@ class PostService
             throw new BadRequestError(`post with id ${postId} did not exist`)
         }
         try {
-            await PostQuery.upSertCommentForPost(comment, postId, userId, null, "2d2f4c2f-f90c-4b24-8da6-d6358dbf58cf")
+            await PostQuery.upSertCommentForPost(comment, postId, userId, parentCommentId, commentId)
+        } catch (error) {
+            throw new BadRequestError(error)
+        }
+        return {metaData: {}}
+    }
+
+    static deleteComment = async(req) => {
+        const commentId = req.params.commentId;
+        const userId = req.cookies.userId;
+        console.log(commentId)
+        if(!commentId || !userId)
+        {
+            throw new BadRequestError("Please give more infor")
+        }
+        const commentData = await PostQuery.getCommentById(commentId, userId)
+        if(commentData == null)
+        {
+            throw new BadRequestError(`comment with id ${commentId} did not exist`)
+        }
+        try {
+            const commentDeleted= await PostQuery.deleteComment(commentId, userId)
         } catch (error) {
             throw new BadRequestError(error)
         }
@@ -189,9 +222,9 @@ class PostService
     }
 
     static likePost = async(req) => {
-        const postId = req.params.postId
+        const commentId = req.params.commentId
         const userId = req.cookies.userId
-        if(!postId || !userId)
+        if(!commentId || !userId)
         {
             throw new BadRequestError("Please give more infor")
         }
