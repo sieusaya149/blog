@@ -11,7 +11,7 @@ class UploadService
         const { filename } = req.file;
         console.log(filename)
         // Generate blob link
-        const blobLink = req.protocol + '://' + req.get('host') + '/uploads/' + filename;
+        const blobLink = req.protocol + '://' + req.get('host') + '/images/' + filename;
 
         // Send the blob link back to the client
         console.log(blobLink)
@@ -41,11 +41,19 @@ class UploadService
         return blobLinks;
       }
     
-      static getImage = async (req) => {
-            const { filename } = req.params;
-            // const dirname = "/Users/hunghoang/project/blogging_BE_site"
-            const filePath = path.join(__dirname, '../..', 'uploads', filename);
-            return filePath
+
+      static uploadSingleVideo = async (req) =>{
+        /// Image file is stored in req.file
+        const { filename } = req.file;
+        // console.log(filename)
+        // Generate blob link
+        const blobLink = req.protocol + '://' + req.get('host') + '/videos/' + filename;
+
+        // Send the blob link back to the client
+        console.log(blobLink)
+        // const newImage = await ImageData.insertImageToDb(blobLink,'avatar',req.headers['userid'], null)
+        // console.log(newImage)
+        return blobLink;
       }
 }
 

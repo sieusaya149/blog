@@ -20,12 +20,12 @@ class UploadController
         }).send(res)
     }
 
-    getImage = async (req, res, next) => {
-        const imageFile = await UploadService.getImage(req)
-        new CREATED({
-            message: "Getting Image Success!",
-            metaData: imageFile
-        }).sendFile(res, imageFile)
+    uploadSingleVideo = async (req, res, next) => {
+        const videoFile = await UploadService.uploadSingleVideo(req)
+        new OK({
+            message: "Upload Video Success",
+            metaData: videoFile
+        }).send(res)
     }
 }
 

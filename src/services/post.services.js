@@ -123,18 +123,9 @@ class PostService
         {
             throw new BadRequestError(`post with id ${postId} did not exist`)
         }
-        const {title, statusEdit, sharePermission, categroryName, deletePost} = req.query
+        const {title, statusEdit, sharePermission, categroryName} = req.query
         const {postContent} = req.body
         var categroryId = null
-        if(deletePost)
-        {
-            try {
-                await PostQuery.deletePost(postId)
-            } catch (error) {
-                throw new BadRequestError("Can not delete Post")
-            }
-            return {metaData: "Delete Post Success"}
-        }
         if(categroryName)
         {
             const existingCategory = await PostQuery.getCategory(categroryName)
@@ -165,6 +156,25 @@ class PostService
             throw new BadRequestError(error)
         }
         return {metaData: {}}
+    }
+
+    static deletePost = async (req) => {
+        const postId = req.params.postId
+        if(!postId)
+        {
+            throw new BadRequestError("Please give more infor")
+        }
+        const postData = await PostQuery.getPostByPostId(postId)
+        if(postData == null)
+        {
+            throw new BadRequestError(`post with id ${postId} did not exist`)
+        }
+        try {
+            await PostQuery.deletePost(postId)
+        } catch (error) {
+            throw new BadRequestError("Can not delete Post")
+        }
+        return {metaData: `Delete Post ${postId} Success`}
     }
 
     static commentPost = async(req) => {

@@ -5,7 +5,7 @@ const helmet = require ('helmet')
 const compress = require ('compression')
 const app = express()
 const cookieParser = require('cookie-parser')
-
+const path = require('path');
 require('dotenv').config()
 //A. init middeware
 // allow all site can access the API
@@ -29,7 +29,7 @@ app.use(express.urlencoded({extends: true}))
 require("./dbs/init.mysql")
 
 //C. init handle error
-
+app.use(express.static(path.join(__dirname, '..', 'uploads')))
 //init routes
 app.use(require("./routers"))
 

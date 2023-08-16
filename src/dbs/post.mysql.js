@@ -142,6 +142,7 @@ class PostQuery {
       }
     }
 
+    // FIXME I think getCategory should not is the method of the class
     async getCategory(categroryName)
     {
       try {
@@ -214,7 +215,7 @@ class PostQuery {
       }
     }
 
-
+   // FIXME I think getCommentById should not is the method of the class
     async getCommentById(commentId)
     {
       try {
@@ -235,6 +236,7 @@ class PostQuery {
       }
     }
 
+    // FIXME I think deleteComment should not is the method of the class
     async deleteComment(commentId, userId)
     {
       try {
