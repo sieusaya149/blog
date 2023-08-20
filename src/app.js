@@ -10,7 +10,8 @@ require('dotenv').config()
 //A. init middeware
 // allow all site can access the API
 app.use(cors({
-    origin: '*'
+    origin: '*',
+    credentials: true
 }));
 // parse cookie
 app.use(cookieParser());
