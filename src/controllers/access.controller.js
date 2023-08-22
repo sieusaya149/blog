@@ -62,6 +62,12 @@ class AccessController
         })
         msg.sendWithResetCookiesAfterResetPassword(res)
     }
+
+    ping = async(req, res, next) => {
+        new OK({
+            message: "User Was Authenticated!"
+        }).send(res)
+    } 
 }
 
 module.exports = new AccessController()

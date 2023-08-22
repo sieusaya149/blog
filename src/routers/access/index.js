@@ -17,6 +17,7 @@ router.post('/reset-password', verifyResetPassword, asyncHanlder(accessControlle
 
 router.use(authentication)
 // logout
+router.get('/ping', asyncHanlder(accessController.ping))
 router.post('/logout', asyncHanlder(accessController.logout))
 
 

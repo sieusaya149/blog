@@ -10,7 +10,7 @@ require('dotenv').config()
 //A. init middeware
 // allow all site can access the API
 app.use(cors({
-    origin: '*',
+    origin: 'http://locahost:3001',
     credentials: true
 }));
 // parse cookie
@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use(morgan("common"))
 // helmet for protect info package http
 // that helping CROS attack, so if test in local please comment it
-app.use(helmet())
+// app.use(helmet())
 // compression reduce the size of package
 app.use(compress())
 
