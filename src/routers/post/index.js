@@ -14,6 +14,7 @@ router.use(authentication)
 router.post('/publish', asyncHanlder(PostController.publishPost))
 router.put('/republish/:postId', asyncHanlder(PostController.rePublishPost))
 router.put('/unpublish/:postId', asyncHanlder(PostController.unpublishPost))
+
 router.get('/read/:postId', asyncHanlder(PostController.readSinglePost))
 // FIXME the categrory can be multiple value, how to edit
 router.put('/edit/:postId', asyncHanlder(PostController.editPost))
@@ -37,7 +38,7 @@ router.post('/like/:postId', asyncHanlder(PostController.likePost))
 
 
 
-router.post('/allpost', asyncHanlder(PostController.getAllPost))
+router.get('/allPost', asyncHanlder(PostController.getAllPost))
 
 router.get('/:postId', asyncHanlder(PostController.getPost))
 

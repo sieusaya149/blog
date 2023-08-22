@@ -81,7 +81,7 @@ class PostQuery {
       try {
         const getPost = 'SELECT * FROM POST WHERE userId = ?';
         const postData = await this.dbInstance.executeQueryV2(getPost, [userId]);
-        if(postData.length > 1)
+        if(postData.length >= 1)
         {
           console.log(`nums post is ${postData.length}`)
           return postData

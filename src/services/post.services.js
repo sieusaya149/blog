@@ -282,20 +282,16 @@ class PostService
     }
 
     static getAllPost = async (req) =>{
-       //1. get all post existed (user id == header)
-       //2. get post data
-       //3. get author data
-       //4. return author data + post data to client
-       const userId = req.headers[HEADER.CLIENT_ID];
+       const userId = req.cookies.userId
        if( !userId)
         {
-            throw new AuthFailureError("Not Enough Headers")
+            throw new AuthFailureError("Not Enough Info")
         }
-       const PostQuery = await PostQuery.getPostByUserId(req.headers[HEADER.CLIENT_ID])
+       const listPost = await PostQuery.getPostByUserId(userId)
        return {
         status: 200,
         metadata: {
-            postsData: PostQuery
+            postsData: listPost
         }
     }
     }
