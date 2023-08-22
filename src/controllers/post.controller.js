@@ -76,6 +76,23 @@ class PostController
         msg.send(res)
     }
 
+    getComment = async (req, res, next) => {
+        const metaData = await PostService.getComment(req)
+        const msg = new OK({
+            message: "Get Comment Successful",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    getAllComment = async (req, res, next) => {
+        new OK({
+            message: "get all comment success!",
+            metaData: await PostService.getAllComment(req)
+        }).send(res)
+    }
+
+
     likePost = async (req, res, next) => {
         const {metaData} = await PostService.likePost(req)
         const msg = new OK({
@@ -98,7 +115,6 @@ class PostController
             metaData: await PostService.getAllPost(req)
         }).send(res)
     }
-
     
 }
 

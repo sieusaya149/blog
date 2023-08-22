@@ -7,7 +7,7 @@ const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
-const {TIMEOUT} = require('../configs/configurations')
+const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 class AccessService
 {
@@ -135,7 +135,7 @@ class AccessService
         const code = generateVerificationCode()
         const codeExpiry = Date.now() +  TIMEOUT.verifyCode; // Token expires in 1 hour
         console.log(`code is ${code}`)
-        await VerifyCodeQuery.createNewVerifyCode(code, codeExpiry, userExist.userId)
+        await VerifyCodeQuery.createNewVerifyCode(code, codeExpiry, VERIFYCODE_TYPE.FORGOT_PASSWORD, userExist.userId)
         mailTransport.send(email,'reset code', code)
         const cookies = { userId: userExist.userId } 
         const metaData = {
@@ -149,7 +149,7 @@ class AccessService
         const userId = req.cookies.userId
         const metaData = {}
         const cookies = {}
-        const existingCode = await VerifyCodeQuery.checkCodeExistOrNot(code, userId)
+        const existingCode = await VerifyCodeQuery.checkCodeExistOrNot(code, userId, VERIFYCODE_TYPE.FORGOT_PASSWORD)
         if(existingCode != null)
         {
             cookies.verifyCode = code
@@ -180,7 +180,7 @@ class AccessService
         const passwordHashed = await bcrypt.hash(newPassword, 10)
         try {
             await UserQuery.updatePassword(passwordHashed, userId)
-            await VerifyCodeQuery.deleteVerifyCode(verifyCode, userId)
+            await VerifyCodeQuery.deleteVerifyCode(verifyCode, userId, VERIFYCODE_TYPE.FORGOT_PASSWORD)
         } catch (error) {
             throw new BadRequestError('Update password is not successful')
         }

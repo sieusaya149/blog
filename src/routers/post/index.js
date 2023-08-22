@@ -20,8 +20,12 @@ router.put('/edit/:postId', asyncHanlder(PostController.editPost))
 router.delete('/delete/post/:postId', asyncHanlder(PostController.deletePost))
 // router.post('/delete/:postId', asyncHanlder(PostController.editComment))
 // FIXME the comment just is basic, in the future hard to development, should spend time refactor
-router.post('/comment/:postId', asyncHanlder(PostController.commentPost))
-router.delete('/delete/comment/:commentId', asyncHanlder(PostController.deleteComment))
+router.post('/comment/put/:postId', asyncHanlder(PostController.commentPost))
+router.delete('/comment/delete/:commentId', asyncHanlder(PostController.deleteComment))
+router.get('/comment/get/:postId', asyncHanlder(PostController.getComment))
+// get all comments and subcomment
+router.get('/comment/getAll/:postId', asyncHanlder(PostController.getAllComment))
+
 
 router.post('/like/:postId', asyncHanlder(PostController.likePost))
 // router.post('/save-change/:postId', asyncHanlder(PostController.updatePost)) // save in draf style

@@ -8,6 +8,7 @@ const DB_QUERYs = {
                         password VARCHAR(255) UNIQUE NOT NULL,\
                         bio LONGTEXT DEFAULT NULL,\
                         birthDay DATE,\
+                        verified BOOLEAN DEFAULT FALSE,\
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
                         PRIMARY KEY(userId));",
@@ -89,14 +90,15 @@ const DB_QUERYs = {
                         FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
 
     CREATE_VERIFY_CODE_TABLE:  "CREATE TABLE IF NOT EXISTS VERIFYCODE(\
-                                    codeId CHAR(36),\
-                                    code VARCHAR(255) UNIQUE NOT NULL,\
-                                    expireTime TIMESTAMP NOT NULL, \
-                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
-                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
-                                    userId CHAR(36),\
-                                    PRIMARY KEY(codeId),\
-                                    FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
+                                codeId CHAR(36),\
+                                code VARCHAR(255) UNIQUE NOT NULL,\
+                                expireTime TIMESTAMP NOT NULL, \
+                                typeCode ENUM('forgotPassword', 'verifyEmail'),\
+                                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                userId CHAR(36),\
+                                PRIMARY KEY(codeId),\
+                                FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);",
 
     CREATE_FOLLOW_LIST_TABLE:   "CREATE TABLE IF NOT EXISTS FOLLOW_LIST(\
                                     followingId CHAR(36) NOT NULL,\
@@ -158,11 +160,22 @@ const TIMEOUT = {
     verifyCode : 60 * 60  *  1000
 }
 
-const ALLOW_DATA = {
+const CONTRAINS_UPDATE_POST = {
     post: {
+        atributes: ['title', 'statusEdit', 'sharePermission', 'summarize', 'content'],
         statusEdit: ['publish', 'unpublish', 'draft'],
         sharePermission: ['private', 'follower', 'public']
     }
 }
 
-module.exports = { DB_QUERYs, TIMEOUT, ALLOW_DATA}
+const CONTRAINS_UPDATE_USER = {
+    users: {
+        atributes: ['userName', 'email', 'bio', 'birthDay']
+    }
+}
+
+const VERIFYCODE_TYPE = {
+    FORGOT_PASSWORD : 'forgotPassword',
+    VERIFY_EMAIL : 'verifyEmail'
+}
+module.exports = { DB_QUERYs, TIMEOUT, CONTRAINS_UPDATE_POST, CONTRAINS_UPDATE_USER, VERIFYCODE_TYPE}

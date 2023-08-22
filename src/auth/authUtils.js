@@ -3,6 +3,7 @@ const instanceMySqlDB = require('../dbs/init.mysql')
 const {asyncHanlder} = require('../helpers/asyncHandler')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
+const { VERIFYCODE_TYPE } = require('../configs/configurations')
 // FIX me because currently in the source code, the keys are not key pair
 // so that we only use private key
 const createTokenPair = async (payload, publicKey, privateKey) => {
@@ -85,7 +86,7 @@ const verifyResetPassword = asyncHanlder(async (req, res, next) => {
        throw new BadRequestError('Please provide more input data')
     }
     // verify code should be exist in db
-    const codeExisting = await VerifyCodeQuery.checkCodeExistOrNot(verifyCode, userId)
+    const codeExisting = await VerifyCodeQuery.checkCodeExistOrNot(verifyCode, userId, VERIFYCODE_TYPE.FORGOT_PASSWORD)
    
     if(codeExisting == null)
     {

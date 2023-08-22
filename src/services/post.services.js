@@ -231,10 +231,40 @@ class PostService
         return {metaData: {}}
     }
 
+    static getComment = async (req) => {
+        const postId = req.params.postId;
+        const userId = req.cookies.userId;
+        const parentCommentId = req.query.parentCommentId
+        if(!postId || !userId)
+        {
+            throw new BadRequestError("Please give more infor")
+        }
+        if(parentCommentId)
+        {
+            return await PostQuery.getCommentByParentId(parentCommentId)
+        }
+        else
+        {
+            return await PostQuery.getCommentByPostId(postId)
+        }
+    }
+
+    static getAllComment = async (req) => {
+        const postId = req.params.postId;
+        const userId = req.cookies.userId;
+        if(!postId || !userId)
+        {
+            throw new BadRequestError("Please give more infor")
+        }
+        const listComment = await PostQuery.getCommentByPostId(postId, false)
+
+    }
+
     static likePost = async(req) => {
-        const commentId = req.params.commentId
+        const postId = req.params.postId
         const userId = req.cookies.userId
-        if(!commentId || !userId)
+        console.log(userId)
+        if(!userId)
         {
             throw new BadRequestError("Please give more infor")
         }

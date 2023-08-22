@@ -1,5 +1,6 @@
 const instanceMySqlDB = require('./init.mysql');
 const { v4: uuidv4 } = require('uuid');
+const { VERIFYCODE_TYPE } = require('../configs/configurations');
 
 class VerifyCodeQuery {
     constructor()
@@ -25,11 +26,11 @@ class VerifyCodeQuery {
           }
     }
 
-    async checkCodeExistOrNot(code, userId)
+    async checkCodeExistOrNot(code, userId, typeCode)
     {
         try {
-            const query = 'SELECT *  FROM VERIFYCODE WHERE code = ? AND userId = ? '
-            const results = await this.dbInstance.executeQueryV2(query, [code, userId]);
+            const query = "SELECT *  FROM VERIFYCODE WHERE code = ? AND userId = ? AND typeCode = ?"
+            const results = await this.dbInstance.executeQueryV2(query, [code, userId, typeCode]);
             if(results.length == 1)
             {
               return results[0]
@@ -43,31 +44,36 @@ class VerifyCodeQuery {
             return null
           }
     }
-    async createNewVerifyCode(code, expireTime , userId) {
+    async createNewVerifyCode(code, expireTime, typeCode, userId) {
         try {
             // check if the userid exist in db or not
             var query = ""
             var codeId = uuidv4();
             const expireDate = new Date(expireTime);
             const existingCode = await this.checkCodeForUserExist(userId)
-            if(existingCode)
-            {
-                codeId = existingCode.codeId
-                query = 'UPDATE VERIFYCODE SET code = ? , expireTime = ? \
-                         WHERE codeId = ?';
-                await this.dbInstance.executeQueryV2(query, [code, expireDate, codeId]);
-            }
-            else
-            {
-                query = 'INSERT INTO VERIFYCODE (codeId, code, expireTime, userId) \
-                VALUES (UUID(), ?, ?, ?)';
-                await this.dbInstance.executeQueryV2(query, [code, expireDate, userId]);
-            }
+            try {
+              if(existingCode)
+              {
+                  codeId = existingCode.codeId
+                  query = 'UPDATE VERIFYCODE SET code = ? , expireTime = ?, typeCode = ?  \
+                          WHERE codeId = ?';
+                  await this.dbInstance.executeQueryV2(query, [code, expireDate, typeCode, codeId]);
+              }
+              else
+              {
+                  query = 'INSERT INTO VERIFYCODE (codeId, code, expireTime, typeCode, userId) \
+                  VALUES (UUID(), ?, ?, ?, ?)';
+                  await this.dbInstance.executeQueryV2(query, [code, expireDate, typeCode, userId]);
+              }
 
-            const verifyCodeSql = 'SELECT * FROM VERIFYCODE WHERE userId = ?';
-            const verifyCode = await this.dbInstance.executeQueryV2(verifyCodeSql, [userId]);
-            console.log(verifyCode)
-            return verifyCode;
+              const verifyCodeSql = 'SELECT * FROM VERIFYCODE WHERE userId = ?';
+              const verifyCode = await this.dbInstance.executeQueryV2(verifyCodeSql, [userId]);
+              console.log(verifyCode)
+              return verifyCode;
+            } catch (error) {
+              throw new Error("Can not process update password")
+            }
+            
           }
           catch (error) {
             console.log(error)
@@ -75,9 +81,9 @@ class VerifyCodeQuery {
           }
     }
 
-    async deleteVerifyCode(code, userId)
+    async deleteVerifyCode(code, userId, typeCode)
     {
-      if(await this.checkCodeExistOrNot(code,userId) == null)
+      if(await this.checkCodeExistOrNot(code,userId,typeCode) == null)
       {
         throw new Error("The code does not exist")
       }

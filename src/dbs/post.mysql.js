@@ -1,53 +1,8 @@
 const instanceMySqlDB = require('./init.mysql');
 const { post } = require('../routers');
 const { v4: uuidv4 } = require('uuid');
-const {ALLOW_DATA} = require ('../configs/configurations.js');
-const { BadRequestError } = require('../core/error.response');
 
-class SqlBuilder{
-  static dynamicSqlForUpdatePostByPostId(queries, postId)
-  {
-      const queryParams = [];
-      let query = 'UPDATE POST SET';
-      for (const queryName in queries)
-      {
-          const queryData = queries[queryName]
-          if(!SqlBuilder.checkParamPost(queryName, queryData))
-          {
-              throw new BadRequestError("The queries data is not correct")
-          }
-          if (queryData) {
-              query += ` ${queryName} = ?,`;
-              queryParams.push(queryData);
-          }
-      }
-      // Remove the trailing comma from the query
-      query = query.slice(0, -1);
-      // Add your WHERE clause to specify the post you want to update
-      query += ' WHERE postId = ?';
-      queryParams.push(postId);
-      return {query, queryParams}
-  }
-  
-  static checkParamPost(queryName, queryData)
-  {
-      switch (queryName) {
-          case "statusEdit":
-              if (!ALLOW_DATA.post.statusEdit.includes(queryData)) {
-                  return false
-              }
-              break;
-          case "sharePermission":
-              if (!ALLOW_DATA.post.sharePermission.includes(queryData)) {
-                  return false
-              }
-              break;
-          default:
-              break;
-      }
-      return true
-  }
-}
+const SqlBuilder = require('../utils/sqlBuilder')
 class PostQuery {
     constructor()
     {
@@ -219,11 +174,57 @@ class PostQuery {
     async getCommentById(commentId)
     {
       try {
-        const getCommentSql = 'SELECT * FROM COMMENT WHERE commentId = ?';
+        const getCommentSql = 'SELECT commentId, commentText, userId FROM COMMENT WHERE commentId = ?';
         const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [commentId]);
         if(commentData.length == 1)
         {
           return commentData[0]
+        }
+        else
+        {
+          return null
+        }
+      }
+      catch (error) {
+        console.log(error)
+        return null
+      }
+    }
+
+    async getCommentByParentId(parentCommentId)
+    {
+      try {
+        const getCommentSql = 'SELECT commentId, commentText, userId, updated_at, created_at FROM COMMENT \
+                               WHERE parentCommentId = ? \
+                               ORDER BY created_at DESC';
+        const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [parentCommentId]);
+        if(commentData.length > 0)
+        {
+          return commentData
+        }
+        else
+        {
+          return null
+        }
+      }
+      catch (error) {
+        console.log(error)
+        return null
+      }
+    }
+
+    async getCommentByPostId(postId, hiddenSubComment = true)
+    {
+      try {
+        const appendQuery = hiddenSubComment? " AND parentCommentId is NULL ": ""
+        const getCommentSql = `SELECT commentId, commentText, userId, updated_at, created_at FROM COMMENT \
+                               WHERE postId = ? ${appendQuery}\
+                               ORDER BY created_at DESC`;
+        const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [postId]);
+        console.log(commentData)
+        if(commentData.length > 0)
+        {
+          return commentData
         }
         else
         {
