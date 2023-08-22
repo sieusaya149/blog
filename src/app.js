@@ -10,7 +10,7 @@ require('dotenv').config()
 //A. init middeware
 // allow all site can access the API
 app.use(cors({
-    origin: 'http://locahost:3001',
+    origin: 'http://localhost:3001',
     credentials: true
 }));
 // parse cookie
