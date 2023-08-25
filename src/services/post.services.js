@@ -9,6 +9,7 @@ const POST_BODY = {
     POST_STATUS: 'postStatus',
     POST_PERMIT: 'postPermit',
     POST_CATEGORY: 'postCategory',
+    POST_SUMMARIZE: 'postSummarize',
     POST_CONTENT: 'postContent',
 }
 function getFirst100Words(text) {
@@ -46,6 +47,7 @@ class PostService
         const postTitle = req.body[POST_BODY.POST_TITLE];
         const postStatus = req.body[POST_BODY.POST_STATUS];// should skip because when publish it always is publish
         const postPermit = req.body[POST_BODY.POST_PERMIT];
+        const postSummarize = req.body[POST_BODY.POST_SUMMARIZE];
         const postContent = req.body[POST_BODY.POST_CONTENT];
         const postCategory = req.body[POST_BODY.POST_CATEGORY]
         if( !userId || 
@@ -53,6 +55,7 @@ class PostService
             !postStatus ||
             !postPermit ||
             !postContent ||
+            !postSummarize ||
             !postCategory)
         {
             throw new BadRequestError("Not Enough Headers")
@@ -63,16 +66,12 @@ class PostService
             throw new BadRequestError("Post status should be Publish")
         }
 
-        const summarize = getFirst100Words(postContent)
-        // check if status valid
-        // check if permit valid
-        // check if categoryId exist
         const categoryData = await PostQuery.getCategory(postCategory)
         if(categoryData == null)
         {
             throw new BadRequestError("Category name is invalid")
         }
-        const postIdNew = await PostQuery.insertPostToDb(postTitle, postStatus, postPermit, summarize, postContent, userId, categoryData.categroryId)
+        const postIdNew = await PostQuery.insertPostToDb(postTitle, postStatus, postPermit, postSummarize, postContent, userId, categoryData.categroryId)
         if(postIdNew == null)
         {
             throw new BadRequestError("Can Not Create New Post")
@@ -282,18 +281,17 @@ class PostService
     }
 
     static getAllPost = async (req) =>{
-       const userId = req.cookies.userId
-       if( !userId)
+        const userId = req.cookies.userId
+        if(!userId)
         {
             throw new AuthFailureError("Not Enough Info")
         }
-       const listPost = await PostQuery.getPostByUserId(userId)
-       return {
-        status: 200,
-        metadata: {
-            postsData: listPost
+        const numberPosts = await PostQuery.getNumberPostOfUser(userId)
+        const listPost = await PostQuery.getPostByUserId(userId, numberPosts)
+        return {
+            numberPosts: numberPosts,
+            listPost: listPost
         }
-    }
     }
     
 }

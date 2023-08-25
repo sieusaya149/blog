@@ -3,6 +3,61 @@ const { post } = require('../routers');
 const { v4: uuidv4 } = require('uuid');
 
 const SqlBuilder = require('../utils/sqlBuilder')
+
+class PostSummarizeContent {
+  constructor(postData, index) {
+    const {
+      postId,
+      title,
+      summarize,
+      created_at,
+      updated_at,
+      userId,
+      userName,
+      avatarUrl,
+      thumbnailUrl
+    } = postData;
+    this.index = index
+    this.postId = postId;
+    this.title = title;
+    this.summarize = summarize;
+    this.created_at = created_at;
+    this.updated_at = updated_at;
+    this.userId = userId;
+    this.userName = userName;
+    this.avatarUrl = avatarUrl;
+    this.thumbnailUrl = thumbnailUrl;
+  }
+
+  getSantilizedPostData() {
+    const { userId, userName, avatarUrl } = this;
+    const {
+      postId,
+      title,
+      summarize,
+      thumbnailUrl,
+      created_at,
+      updated_at
+    } = this;
+
+    return {
+      index: this.index,
+      author: {
+        userId,
+        userName,
+        avatar: avatarUrl
+      },
+      postData: {
+        postId,
+        title,
+        summarize,
+        thumbnail: thumbnailUrl,
+        created_at,
+        updated_at
+      }
+    };
+  }
+}
 class PostQuery {
     constructor()
     {
@@ -76,15 +131,42 @@ class PostQuery {
       }
     }
 
-    async getPostByUserId(userId)
+    async getPostByUserId(userId, numberPosts)
     {
       try {
-        const getPost = 'SELECT * FROM POST WHERE userId = ?';
+        const getPost = "SELECT\
+                          p.postId,\
+                          p.title,\
+                          p.summarize,\
+                          p.created_at,\
+                          p.updated_at,\
+                          u.userId, \
+                          u.userName,\
+                          a.imageUrl AS avatarUrl,\
+                          t.imageUrl AS thumbnailUrl\
+                        FROM\
+                            post p\
+                        JOIN\
+                            user u ON p.userId = u.userId\
+                        LEFT JOIN\
+                            image a ON u.userId = a.userId AND a.topic = 'avatar'\
+                        LEFT JOIN\
+                            image t ON p.postId = t.postId AND t.topic = 'thumnail'\
+                        WHERE\
+                            p.userId = ?\
+                        ORDER BY\
+                        p.created_at DESC;";
         const postData = await this.dbInstance.executeQueryV2(getPost, [userId]);
-        if(postData.length >= 1)
+        if(postData.length == numberPosts)
         {
-          console.log(`nums post is ${postData.length}`)
-          return postData
+          let postSummarizeContents = []
+          let index = 0
+          postData.forEach(element => {
+              let postSummarize = new PostSummarizeContent(element, index)
+              postSummarizeContents.push(postSummarize.getSantilizedPostData())
+              index = index + 1
+          });
+          return postSummarizeContents
         }
         else
         {
@@ -93,6 +175,18 @@ class PostQuery {
       }
       catch (error) {
         console.log(error)
+        return null
+      }
+    }
+
+    async getNumberPostOfUser(userId)
+    {
+      try {
+        const numsPostQuery = 'SELECT COUNT(*) FROM POST WHERE userId = ?';
+        const result = await this.dbInstance.executeQueryV2(numsPostQuery, [userId]);
+        return result[0]['COUNT(*)']
+      }
+      catch (error) {
         return null
       }
     }
