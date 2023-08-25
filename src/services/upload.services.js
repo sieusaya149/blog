@@ -3,20 +3,33 @@ const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const path = require('path');
 const ImageData = require('../dbs/image.mysql')
 
+const AVATAR_TOPIC = ['avatar', 'thumnail', 'content']
 
 class UploadService
 {
     static uploadSingleImage = async (req) =>{
         /// Image file is stored in req.file
+        let userId = req.cookies.userId
+        let {topic, postId} = req.query
+        if(!userId)
+        {
+          throw new AuthFailureError("Please verify your authentication", 401)
+        }
+        if (!AVATAR_TOPIC.includes(topic))
+        {
+          throw new BadRequestError("Please give correct topic", 400) 
+        }
+        else if(topic == 'thumnail' && !postId)
+        {
+          {
+            throw new BadRequestError("Please give infor of post", 400)
+          }
+        }
         const { filename } = req.file;
         console.log(filename)
         // Generate blob link
         const blobLink = req.protocol + '://' + req.get('host') + '/images/' + filename;
-
-        // Send the blob link back to the client
-        console.log(blobLink)
-        const newImage = await ImageData.insertImageToDb(blobLink,'avatar',req.headers['userid'], null)
-        console.log(newImage)
+        await ImageData.insertImageToDb(blobLink, topic, userId, postId)
         return blobLink;
     }
 

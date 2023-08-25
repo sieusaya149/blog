@@ -1,5 +1,6 @@
 const instanceMySqlDB = require('./init.mysql');
 const { post } = require('../routers');
+const { BadRequestError } = require('../core/error.response');
 
 class ImageData {
     constructor()
@@ -17,8 +18,7 @@ class ImageData {
         return imageId;
       }
       catch (error) {
-        console.log(username)
-        return null
+        throw new BadRequestError("The issue when uploading image ", 400)
       }
     }
 }
