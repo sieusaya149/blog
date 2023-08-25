@@ -33,41 +33,49 @@ class ImageData {
     async upSertImage(imageUrl, topic, userId, postId)
     {
       try {
-        const query = 'SELECT * FROM IMAGE WHERE userId = ? AND topic = ? AND postId = ?';
-        const imagesExisting = await this.dbInstance.executeQueryV2(query, [userId, topic, postId]);
-        if(imagesExisting.length == 1 && topic == 'avatar' )
+        if(topic == 'avatar' )
         {
-          // FIXME should delete image on disk also
-          const query = "UPDATE IMAGE set imageUrl = ? where userId = ? and topic = ?"
-          const result = await this.dbInstance.executeQueryV2(query, [imageUrl, userId, topic])
-          if(result.affectedRows == 0)
+          const queryAvatar = "SELECT * FROM IMAGE WHERE userId = ? AND topic = ?";
+          const avatarExisting = await this.dbInstance.executeQueryV2(queryAvatar, [userId, topic]);
+          if(avatarExisting.length == 1)
           {
-            throw new Error("No Avatar was updated")
-          }
-          console.log('UPDATE: the existing image in db was updated successfully')
-        }
-        else if (imagesExisting.length == 1 && topic == 'thumnail')
-        {
             // FIXME should delete image on disk also
-            const query = "UPDATE IMAGE set imageUrl = ? where postId = ? and topic = ?"
-            const result = await this.dbInstance.executeQueryV2(query, [imageUrl, postId, topic])
+            const query = "UPDATE IMAGE set imageUrl = ? where userId = ? and topic = ?"
+            const result = await this.dbInstance.executeQueryV2(query, [imageUrl, userId, topic])
             if(result.affectedRows == 0)
             {
-              throw new Error("No Thumbnail was updated")
+              throw new Error("No Avatar was updated")
             }
             console.log('UPDATE: the existing image in db was updated successfully')
+            return;
+          } 
         }
-        else
+        else if (topic == 'thumnail')
         {
-          const query = 'INSERT INTO IMAGE (imageId, imageUrl, topic, postId, userId)\
-                         VALUES (UUID(), ?, ?, ?, ?)';
-          const result = await this.dbInstance.executeQueryV2(query, [imageUrl, topic, postId, userId]);
-          if(result.affectedRows != 1)
+          const queryThumbnail = "SELECT * FROM IMAGE WHERE postId = ? AND topic = ?";
+          const thumbnailExisting = await this.dbInstance.executeQueryV2(queryThumbnail, [postId, topic]);
+          if(thumbnailExisting.length == 1)
           {
-            throw new Error("Can not insert new image")
+              // FIXME should delete image on disk also
+              const query = "UPDATE IMAGE set imageUrl = ? where postId = ? and topic = ?"
+              const result = await this.dbInstance.executeQueryV2(query, [imageUrl, postId, topic])
+              if(result.affectedRows == 0)
+              {
+                throw new Error("No Thumbnail was updated")
+              }
+              console.log('UPDATE: the existing image in db was updated successfully')
+              return
           }
-          console.log('INSERT: the new image was inserted successfully')
         }
+        // inserted new
+        const query = 'INSERT INTO IMAGE (imageId, imageUrl, topic, postId, userId)\
+                        VALUES (UUID(), ?, ?, ?, ?)';
+        const result = await this.dbInstance.executeQueryV2(query, [imageUrl, topic, postId, userId]);
+        if(result.affectedRows != 1)
+        {
+          throw new Error("Can not insert new image")
+        }
+        console.log('INSERT: the new image was inserted successfully')
       }
       catch (error) {
         console.log(error)
