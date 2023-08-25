@@ -4,6 +4,8 @@ const path = require('path');
 const PostQuery = require('../dbs/post.mysql')
 const { get } = require('../routers');
 const { query } = require('express');
+const TransactionQuery = require('../dbs/transaction.mysql')
+const ImageData = require("../dbs/image.mysql")
 const POST_BODY = {
     POST_TITLE: 'postTitle',
     POST_STATUS: 'postStatus',
@@ -77,6 +79,60 @@ class PostService
             throw new BadRequestError("Can Not Create New Post")
         }
         return {newPostId: postIdNew}
+    }
+
+    static publishPostWithThumbnail = async (req) =>{
+        const userId = req.cookies.userId;
+        const parsingPostData = JSON.parse(req.body.postData)
+        const postTitle = parsingPostData[POST_BODY.POST_TITLE];
+        const postStatus = parsingPostData[POST_BODY.POST_STATUS];// should skip because when publish it always is publish
+        const postPermit = parsingPostData[POST_BODY.POST_PERMIT];
+        const postSummarize = parsingPostData[POST_BODY.POST_SUMMARIZE];
+        const postContent = parsingPostData[POST_BODY.POST_CONTENT];
+        const postCategory = parsingPostData[POST_BODY.POST_CATEGORY]
+        if( !userId || 
+            !postTitle ||
+            !postStatus ||
+            !postPermit ||
+            !postContent ||
+            !postSummarize ||
+            !postCategory)
+        {
+            throw new BadRequestError("Not Enough Headers")
+        }
+        const { filename } = req.file;
+        if(!filename)
+        {
+            throw new BadRequestError("Please adding thumbnail for this post")
+        }
+        
+        if( postStatus !== 'publish')
+        {
+            throw new BadRequestError("Post status should be Publish")
+        }
+
+        const categoryData = await PostQuery.getCategory(postCategory)
+        if(categoryData == null)
+        {
+            throw new BadRequestError("Category name is invalid")
+        }
+        TransactionQuery.startTransaction()
+        try {
+            const postIdNew = await PostQuery.insertPostToDb(postTitle, postStatus, postPermit, postSummarize, postContent, userId, categoryData.categroryId)
+            if(!postIdNew)
+            {
+                throw new Error("PostId is null")
+            }
+            const blobLink = req.protocol + '://' + req.get('host') + '/images/' + filename;
+            await ImageData.upSertImage(blobLink, 'thumnail', userId, postIdNew)
+            TransactionQuery.commitTransaction()
+            return {newPostId: postIdNew,
+                    thumbnail: blobLink}
+        } catch (error) {
+            TransactionQuery.rollBackTransaction()
+            console.log(error)
+            throw new BadRequestError("Error: Issue when create new post with thumbnail") 
+        }
     }
 
     static rePublishPost = async (req) => {

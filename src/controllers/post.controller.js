@@ -13,6 +13,16 @@ class PostController
         })
         msg.send(res)
     }
+
+    publishPostWithThumbnail = async (req, res, next) => {
+        const metaData = await PostService.publishPostWithThumbnail(req)
+        const msg = new OK({
+            message: "Update new Post With Thumbnail Success!",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
     rePublishPost = async (req, res, next) => {
         const metaData = await PostService.rePublishPost(req)
         const msg = new OK({

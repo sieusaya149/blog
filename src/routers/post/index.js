@@ -5,6 +5,7 @@ const router = express.Router()
 const {asyncHanlder} = require('../../helpers/asyncHandler')
 const { authentication } = require('../../auth/authUtils')
 const PostController = require('../../controllers/post.controller')
+const {imageUpload} = require('../../helpers/uploadMulter')
 require('dotenv').config()
 
 router.use(authentication)
@@ -12,6 +13,7 @@ router.use(authentication)
 
 // logout api
 router.post('/publish', asyncHanlder(PostController.publishPost))
+router.post('/publish_v2', imageUpload.single('thumbnail'),  asyncHanlder(PostController.publishPostWithThumbnail))
 router.put('/republish/:postId', asyncHanlder(PostController.rePublishPost))
 router.put('/unpublish/:postId', asyncHanlder(PostController.unpublishPost))
 
