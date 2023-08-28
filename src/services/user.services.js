@@ -1,8 +1,5 @@
-const instanceMySqlDB = require('../dbs/init.mysql')
 const UserQuery  = require('../dbs/user.mysql')
-const bcrypt = require('bcrypt')
-const crypto = require('crypto')
-const {createTokenPair} = require("../auth/authUtils")
+const FriendQuery = require('../dbs/friends.mysql')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 const {generateVerificationCode} = require('../helpers/randomCode')
@@ -108,12 +105,50 @@ class UserService
             throw new BadRequestError('Please give more information')
         }
         try {
-            await FriendQuery.addNewFriendRequest(requesterId, recipientId)
+            // because this is the request friend so that status is Pending
+            const status = "Pending"
+            await FriendQuery.upsertNewFriendRequest(requesterId, recipientId, status)
+            // FIXME add notify for the recipient here
         } catch (error) {
             throw new BadRequestError(error)
         }
         return {}
     }
+
+    static answereRequest = async (req) => {
+        const recipientId = req.cookies.userId
+        const requesterId = req.params.requesterId
+        const status = req.query.ans
+        const friendlyExistence = await FriendQuery.checkIfTheyAreFriend(requesterId, recipientId)
+        if(friendlyExistence)
+        {
+            throw new BadRequestError('You and this user is the friend right now')
+        }
+        if(!requesterId || !recipientId || !status)
+        {
+            throw new BadRequestError('Please give more information')
+        }
+        const friendRequestExist = await FriendQuery.isFriendRequestExist(requesterId, recipientId)
+        if(!friendRequestExist)
+        {
+            throw new BadRequestError("No friend request with status is pending exist, maybe you have answered before")
+        }
+        // update friend request and frienship
+        await TransactionQuery.startTransaction()
+        try {
+            await FriendQuery.updateFriendRequest(requesterId, recipientId, status)
+            const currentStatus = await FriendQuery.getStatusOfFriendRequest(requesterId, recipientId)
+            if(currentStatus == "Accepted")
+            {
+                await FriendQuery.addNewFriendShip(recipientId, requesterId)
+                // FIXME add notify for the requester and recipient here
+            }
+            await TransactionQuery.commitTransaction()
+        }
+        catch (error) {
+            await TransactionQuery.rollBackTransaction()
+            throw new BadRequestError(error)
+        }
         return {}
     }
 }
