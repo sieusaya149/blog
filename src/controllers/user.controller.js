@@ -70,6 +70,15 @@ class UserController {
         })
         msg.send(res)
     }
+
+    getFriendRequest = async(req, res, next) => {
+        var metaData = await UserService.getFriendRequest(req)
+        const msg = new OK({
+            message: "Get List Friend Requests Successfullys",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
 }
 
 module.exports = new UserController()

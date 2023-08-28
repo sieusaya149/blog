@@ -96,6 +96,28 @@ class UserService
         return {}
     }
 
+    static getFriendRequest = async(req) => {
+        const recipientId = req.cookies.userId
+        const status = req.query.status
+        if(!recipientId)
+        {
+            throw new BadRequestError('Please give more information')
+        }
+        if(status && status != 'Accepted' && status != 'Rejected' && status != 'Pending')
+        {
+            throw new BadRequestError("The status does not expectation, should be (Accepted ,Rejected or Pending)")
+        }
+        
+        try
+        {
+            const listRequest = await FriendQuery.getAllFriendRequestsByStatus(recipientId, status)
+            return listRequest
+        }
+        catch (error) {
+            throw new BadRequestError("Something went wrong when getting data")
+        }
+    }
+
     static friendRequest = async (req) => {
         const requesterId = req.cookies.userId
         const recipientId = req.params.friendId

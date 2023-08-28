@@ -35,6 +35,25 @@ class FriendQuery {
             throw new BadRequestError("The status does not expectation, should be (Accepted ,Rejected or Pending)")
         }
     }
+
+    async getAllFriendRequestsByStatus(recipientId, status = null)
+    {
+        let query = 'SELECT * FROM FRIEND_REQUESTS where recipientId = ?';
+        let listParams = [recipientId]
+        if(status)
+        {
+            query = query +  "and status = ?"
+            listParams.push(status)
+        }
+        try {
+            const listFriendRequest = await this.dbInstance.executeQueryV2(query, listParams);
+            return listFriendRequest
+        }
+        catch (error) {
+            throw new BadRequestError("Some thing went wrong when making friend request")
+        }
+    }
+
     async upsertNewFriendRequest(requesterId, recipientId, status = 'Pending') {
         const isRequesterExist  = await UserQuery.checkUserExistById(requesterId)
         const isRecipientExist  = await UserQuery.checkUserExistById(recipientId)

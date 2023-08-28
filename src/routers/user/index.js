@@ -5,7 +5,6 @@ const router = express.Router()
 const {asyncHanlder} = require('../../helpers/asyncHandler')
 const { authentication } = require('../../auth/authUtils')
 const UserController = require('../../controllers/user.controller')
-const userController = require('../../controllers/user.controller')
 require('dotenv').config()
 
 router.use(authentication)
@@ -15,11 +14,13 @@ router.get('/myProfile', asyncHanlder(UserController.getMyProfile))
 router.put('/updateProfile', asyncHanlder(UserController.updateProfile))
 router.delete('/deleteProfile', asyncHanlder(UserController.deleteProfile))
 
-router.post('/verify', asyncHanlder(userController.verifyEmailForUser))
-router.post('/verify/:verifyCode', asyncHanlder(userController.updateStatusVerifyForUser))
+router.post('/verify', asyncHanlder(UserController.verifyEmailForUser))
+router.post('/verify/:verifyCode', asyncHanlder(UserController.updateStatusVerifyForUser))
 
 // friend request
-router.post('/friend_request/:friendId', asyncHanlder(userController.friendRequest))
-router.post('/answere_request/:requesterId', asyncHanlder(userController.answereRequest))
+router.post('/friend_request/:friendId', asyncHanlder(UserController.friendRequest))
+router.post('/answere_request/:requesterId', asyncHanlder(UserController.answereRequest))
+router.get('/friend_requests', asyncHanlder(UserController.getFriendRequest))
+
 
 module.exports = router
