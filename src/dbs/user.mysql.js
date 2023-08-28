@@ -16,13 +16,26 @@ class UserQuery {
             return null
         }
     }
+
+    async checkUserExistById(userId) {
+        try {
+            const query = 'SELECT COUNT(*) as count FROM USER WHERE userId = ?';
+            const results = await this.dbInstance.executeQueryV2(query, [userId]);
+            const count = results[0].count;
+            return count > 0? true: false;
+        } catch (error) {
+            console.log(error)
+            return null
+        }
+    }
+
     async getUserById(userId) {
         try {
         const query = 'SELECT * FROM USER WHERE userId = ?';
         const results = await this.dbInstance.executeQueryV2(query, [userId]);
         if(results.length !=1)
         {
-            throw new Error (`More than one user use ${email}`)
+            throw new Error (`More than one user has same id ${userId}`)
         }
         else
         {
@@ -108,7 +121,6 @@ class UserQuery {
     {
         const query = 'UPDATE USER SET verified = ? WHERE userId = ?'
         const result = await this.dbInstance.executeQueryV2(query, [status, userId]);
-
     }
 }
 

@@ -52,6 +52,24 @@ class UserController {
         })
         msg.send(res)
     }
+    
+    friendRequest = async(req, res, next) => {
+        var metaData = await UserService.friendRequest(req)
+        const msg = new OK({
+            message: "Your friend request was sent",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    answereRequest = async(req, res, next) => {
+        var metaData = await UserService.answereRequest(req)
+        const msg = new OK({
+            message: "Your reply was sent",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
 }
 
 module.exports = new UserController()

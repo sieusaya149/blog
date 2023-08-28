@@ -98,6 +98,24 @@ class UserService
         
         return {}
     }
+
+    static friendRequest = async (req) => {
+        const requesterId = req.cookies.userId
+        const recipientId = req.params.friendId
+        
+        if(!requesterId || !recipientId)
+        {
+            throw new BadRequestError('Please give more information')
+        }
+        try {
+            await FriendQuery.addNewFriendRequest(requesterId, recipientId)
+        } catch (error) {
+            throw new BadRequestError(error)
+        }
+        return {}
+    }
+        return {}
+    }
 }
 
 

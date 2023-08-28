@@ -18,5 +18,8 @@ router.delete('/deleteProfile', asyncHanlder(UserController.deleteProfile))
 router.post('/verify', asyncHanlder(userController.verifyEmailForUser))
 router.post('/verify/:verifyCode', asyncHanlder(userController.updateStatusVerifyForUser))
 
+// friend request
+router.post('/friend_request/:friendId', asyncHanlder(userController.friendRequest))
+router.post('/answere_request/:requesterId', asyncHanlder(userController.answereRequest))
 
 module.exports = router
