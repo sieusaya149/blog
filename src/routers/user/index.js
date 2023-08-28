@@ -21,6 +21,7 @@ router.post('/verify/:verifyCode', asyncHanlder(UserController.updateStatusVerif
 router.post('/friend_request/:friendId', asyncHanlder(UserController.friendRequest))
 router.post('/answere_request/:requesterId', asyncHanlder(UserController.answereRequest))
 router.get('/friend_requests', asyncHanlder(UserController.getFriendRequest))
+router.delete('/unfriend/:friendId', asyncHanlder(UserController.unfriend))
 
 
 module.exports = router

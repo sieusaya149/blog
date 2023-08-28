@@ -6,6 +6,7 @@ const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
+const transactionMysql = require('../dbs/transaction.mysql')
 
 class UserService
 {
@@ -132,6 +133,25 @@ class UserService
             await FriendQuery.upsertNewFriendRequest(requesterId, recipientId, status)
             // FIXME add notify for the recipient here
         } catch (error) {
+            throw new BadRequestError(error)
+        }
+        return {}
+    }
+
+    static unfriend = async (req) => {
+        const requesterId = req.cookies.userId
+        const recipientId = req.params.friendId
+        
+        if(!requesterId || !recipientId)
+        {
+            throw new BadRequestError('Please give more information')
+        }
+        await TransactionQuery.startTransaction()
+        try {
+            await FriendQuery.deleteFriendShip(requesterId, recipientId)
+            await TransactionQuery.commitTransaction()
+        } catch (error) {
+            await TransactionQuery.rollBackTransaction()
             throw new BadRequestError(error)
         }
         return {}

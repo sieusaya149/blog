@@ -126,6 +126,23 @@ class FriendQuery {
         return result[0]?.['COUNT(*)'] == 1
     
     }
+
+    async deleteFriendShip(userAId, userBId)
+    {
+        const friendlyExistence = await this.checkIfTheyAreFriend(userAId, userBId)
+        if(!friendlyExistence)
+        {
+            throw new BadRequestError('You and this user does not a friend right now')
+        }
+        const deleteQuery = `DELETE FROM FRIENDSHIPS
+                             WHERE (userAId = ? AND userBId = ?)
+                             OR (userAId = ? AND userBId = ?)`;
+        const result = await this.dbInstance.executeQueryV2(deleteQuery, [userAId, userBId, userBId, userAId]);
+        if(result.affectedRows != 2)
+        {
+            throw new BadRequestError("Some thing wrong when delete data")
+        }
+    }
 }
 
 module.exports = new FriendQuery()

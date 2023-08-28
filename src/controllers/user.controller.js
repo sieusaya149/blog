@@ -79,6 +79,15 @@ class UserController {
         })
         msg.send(res)
     }
+
+    unfriend = async (req, res, next) => {
+        var metaData = await UserService.unfriend(req)
+        const msg = new OK({
+            message: "Unfriend Successfullys",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
 }
 
 module.exports = new UserController()

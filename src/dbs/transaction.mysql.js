@@ -10,8 +10,7 @@ class TransactionQuery {
             const results = this.dbInstance.executeQuery(query);
             console.log(results.sql)
         } catch (error) {
-            console.log(error)
-            return null
+            throw new Error("Issue Happen when start transaction")
         }
     }
 
@@ -21,8 +20,7 @@ class TransactionQuery {
             const results = this.dbInstance.executeQuery(query);
             console.log(results.sql)
         } catch (error) {
-            console.log(error)
-            return null
+            throw new Error("Issue Happen when rollback transaction")
         }
     }
 
@@ -34,8 +32,7 @@ class TransactionQuery {
             console.log(results.sql)
 
           } catch (error) {
-            console.log(error)
-            return null
+            throw new Error("Issue Happen when commit transaction")
           }
     }
 }
