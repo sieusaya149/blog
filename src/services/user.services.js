@@ -107,7 +107,7 @@ class UserService
         {
             throw new BadRequestError("The status does not expectation, should be (Accepted ,Rejected or Pending)")
         }
-        
+
         try
         {
             const listRequest = await FriendQuery.getAllFriendRequestsByStatus(recipientId, status)
@@ -150,7 +150,8 @@ class UserService
         {
             throw new BadRequestError('Please give more information')
         }
-        const friendRequestExist = await FriendQuery.isFriendRequestExist(requesterId, recipientId)
+        // should be answered for pending request, that mean each request only was answered one time
+        const friendRequestExist = await FriendQuery.isFriendRequestExist(requesterId, recipientId, "Pending")
         if(!friendRequestExist)
         {
             throw new BadRequestError("No friend request with status is pending exist, maybe you have answered before")

@@ -82,10 +82,16 @@ class FriendQuery {
         }
     }
 
-    async isFriendRequestExist(requesterId, recipientId)
+    async isFriendRequestExist(requesterId, recipientId, status=null)
     {
-        const query = "SELECT COUNT(*) FROM FRIEND_REQUESTS WHERE requesterId = ? AND recipientId = ?";
-        const result = await this.dbInstance.executeQueryV2(query, [requesterId, recipientId]);
+        let query = "SELECT COUNT(*) FROM FRIEND_REQUESTS WHERE requesterId = ? AND recipientId = ?";
+        let listParams = [requesterId, recipientId]
+        if(status)
+        {
+            query = query +  "AND status = ?"
+            listParams.push(status)
+        }
+        const result = await this.dbInstance.executeQueryV2(query, listParams);
         return result[0]?.['COUNT(*)'] == 1
     }
 
