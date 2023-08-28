@@ -108,7 +108,29 @@ const DB_QUERYs = {
                                     FOREIGN KEY (followingId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
                                     FOREIGN KEY (followerId) REFERENCES USER(userId)ON DELETE CASCADE ON UPDATE CASCADE,\
                                     CONSTRAINT uc_follow UNIQUE (followingId, followerId));",
-                                
+              
+    CREATE_FRIEND_REQUESTS_TABLE:  "CREATE TABLE IF NOT EXISTS FRIEND_REQUESTS (\
+                                    requestId CHAR(36),\
+                                    requesterId CHAR(36) NOT NULL,\
+                                    recipientId CHAR(36) NOT NULL,\
+                                    status ENUM('Pending', 'Accepted', 'Rejected') DEFAULT 'pending',\
+                                    PRIMARY KEY(requestId),\
+                                    FOREIGN KEY (requesterId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (recipientId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                    CONSTRAINT uc_friendRequest UNIQUE (requesterId, recipientId));",
+
+    CREATE_TABLE_FRIENDSHIPS:      "CREATE TABLE IF NOT EXISTS FRIENDSHIPS (\
+                                    friendshipId CHAR(36),\
+                                    userAId CHAR(36) NOT NULL,\
+                                    userBId CHAR(36) NOT NULL,\
+                                    FOREIGN KEY (userAId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    FOREIGN KEY (userBId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE,\
+                                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,\
+                                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
+                                    CONSTRAINT uc_friendShip UNIQUE (userAId, userBId));",
+
     CREATE_COMMENT_TABLE:           "CREATE TABLE IF NOT EXISTS COMMENT(\
                                     commentId CHAR(36) NOT NULL,\
                                     commentText TEXT NOT NULL,\

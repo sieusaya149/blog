@@ -116,7 +116,7 @@ class PostService
         {
             throw new BadRequestError("Category name is invalid")
         }
-        TransactionQuery.startTransaction()
+        await TransactionQuery.startTransaction()
         try {
             const postIdNew = await PostQuery.insertPostToDb(postTitle, postStatus, postPermit, postSummarize, postContent, userId, categoryData.categroryId)
             if(!postIdNew)
@@ -125,11 +125,11 @@ class PostService
             }
             const blobLink = req.protocol + '://' + req.get('host') + '/images/' + filename;
             await ImageData.upSertImage(blobLink, 'thumnail', userId, postIdNew)
-            TransactionQuery.commitTransaction()
+            await TransactionQuery.commitTransaction()
             return {newPostId: postIdNew,
                     thumbnail: blobLink}
         } catch (error) {
-            TransactionQuery.rollBackTransaction()
+            await TransactionQuery.rollBackTransaction()
             console.log(error)
             throw new BadRequestError("Error: Issue when create new post with thumbnail") 
         }

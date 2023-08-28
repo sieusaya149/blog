@@ -11,7 +11,6 @@ class Database
         if( this.connection != null)
         {
             this.executeQuery(DB_QUERYs.CREATE_APIKEY_TABLE, "CREATE_APIKEY_TABLE")
-
             this.executeQuery(DB_QUERYs.CREATE_USER_TABLE, "CREATE_USER_TABLE");
             this.executeQuery(DB_QUERYs.CREATE_TAG_TABLE, "CREATE_TAG_TABLE");
             this.executeQuery(DB_QUERYs.CREATE_CATEGORY_TABLE, "CREATE_CATEGORY_TABLE");
@@ -24,6 +23,8 @@ class Database
             this.executeQuery(DB_QUERYs.CREATE_COMMENT_TABLE, "CREATE_COMMENT_TABLE")
             this.executeQuery(DB_QUERYs.CREATE_LIKE_EMOTION_TABLE, "CREATE_LIKE_EMOTION_TABLE")
             this.executeQuery(DB_QUERYs.CREATE_FOLLOW_LIST_TABLE, "CREATE_FOLLOW_LIST_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_FRIEND_REQUESTS_TABLE, "CREATE_FRIEND_REQUESTS_TABLE")
+            this.executeQuery(DB_QUERYs.CREATE_TABLE_FRIENDSHIPS, "CREATE_TABLE_FRIENDSHIPS")
             this.executeQuery(DB_QUERYs.CREATE_SAVELIST_TABLE, "CREATE_SAVELIST_TABLE")
             this.executeQuery(DB_QUERYs.CREATE_SAVELIST_POST_TABLE, "CREATE_SAVELIST_POST_TABLE")
         }

@@ -31,7 +31,7 @@ class AccessService
         
         const passwordHashed = await bcrypt.hash(password, 10)
 
-        TransactionQuery.startTransaction()
+        await TransactionQuery.startTransaction()
         try {
             const newUser = await UserQuery.addUser(username, email, passwordHashed, birth)
             const publicKey = crypto.randomBytes(64).toString('hex')
@@ -45,7 +45,7 @@ class AccessService
                                                             tokens.refreshToken,
                                                             "{}",
                                                             newUser)
-            TransactionQuery.commitTransaction()
+            await TransactionQuery.commitTransaction()
             return {newUserId: newUser,
                     newTokens: {
                         publicKey: publicKey,
@@ -53,7 +53,7 @@ class AccessService
                         refreshKey: tokens.refreshToken
                     }}  
         } catch (error) {
-            TransactionQuery.rollBackTransaction()
+            await TransactionQuery.rollBackTransaction()
             throw new BadRequestError("Error: Issue when create new user and keystore")       
         }           
     }
