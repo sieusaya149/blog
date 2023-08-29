@@ -38,11 +38,21 @@ class FriendQuery {
 
     async getAllFriendRequestsByStatus(recipientId, status = null)
     {
-        let query = 'SELECT * FROM FRIEND_REQUESTS where recipientId = ?';
+        let query = `SELECT FR.requesterId,
+                            U1.userName AS requesterName,
+                            FR.recipientId, 
+                            U2.userName AS recipientName,
+                            FR.status,
+                            FR.created_at
+                    FROM FRIEND_REQUESTS FR
+                    LEFT JOIN USER U1 ON U1.userId = FR.requesterId
+                    LEFT JOIN USER U2 ON U2.userId = FR.recipientId
+                    WHERE FR.recipientId = ? `;
         let listParams = [recipientId]
         if(status)
         {
-            query = query +  "and status = ?"
+            query = query +  " AND FR.status = ?" 
+            console.log(query)
             listParams.push(status)
         }
         try {
