@@ -46,6 +46,28 @@ class UserQuery {
         return null
         }
     }
+
+    async getBasicUserDataById(userId) {
+        try {
+        const query = `SELECT U.userName, U.email, I.imageUrl
+                       FROM USER U
+                       LEFT JOIN IMAGE I ON U.userId = I.userId AND I.topic='avatar'\
+                       WHERE U.userId = ?`
+        const results = await this.dbInstance.executeQueryV2(query, [userId]);
+        if(results.length !=1)
+        {
+            throw new Error (`Some thing wrong related to userData`)
+        }
+        else
+        {
+            return results[0]
+        }
+        } catch (error) {
+        console.log(error)
+        return null
+        }
+    }
+
     async getUserFromMail(email) {
         try {
         const query = 'SELECT * FROM USER WHERE email = ?';

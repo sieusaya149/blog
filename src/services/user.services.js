@@ -4,10 +4,9 @@ const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
-const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
+const {TIMEOUT, VERIFYCODE_TYPE, NOTIFICATION_TYPES} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
-const transactionMysql = require('../dbs/transaction.mysql')
-
+const {NotifyManager} = require("./notification.services")
 class UserService
 {
     static getMyProfile = async (req) =>
@@ -127,12 +126,20 @@ class UserService
         {
             throw new BadRequestError('Please give more information')
         }
+        if(requesterId === recipientId)
+        {
+            throw new BadRequestError('Please double check your input')
+        }
+        await TransactionQuery.startTransaction()
         try {
             // because this is the request friend so that status is Pending
             const status = "Pending"
             await FriendQuery.upsertNewFriendRequest(requesterId, recipientId, status)
-            // FIXME add notify for the recipient here
+            // trigger sending notify for friend request event
+            NotifyManager.triggerNotify(NOTIFICATION_TYPES.friendRequest, requesterId, recipientId)
+            await TransactionQuery.commitTransaction()
         } catch (error) {
+            await TransactionQuery.rollBackTransaction()
             throw new BadRequestError(error)
         }
         return {}
@@ -141,7 +148,10 @@ class UserService
     static unfriend = async (req) => {
         const requesterId = req.cookies.userId
         const recipientId = req.params.friendId
-        
+        if(requesterId === recipientId)
+        {
+            throw new BadRequestError('Please double check your input')
+        }
         if(!requesterId || !recipientId)
         {
             throw new BadRequestError('Please give more information')
@@ -161,6 +171,10 @@ class UserService
         const recipientId = req.cookies.userId
         const requesterId = req.params.requesterId
         const status = req.query.ans
+        if(requesterId === recipientId)
+        {
+            throw new BadRequestError('Please double check your input')
+        }
         const friendlyExistence = await FriendQuery.checkIfTheyAreFriend(requesterId, recipientId)
         if(friendlyExistence)
         {
@@ -184,7 +198,9 @@ class UserService
             if(currentStatus == "Accepted")
             {
                 await FriendQuery.addNewFriendShip(recipientId, requesterId)
-                // FIXME add notify for the requester and recipient here
+                // trigger sending notify for answere request event
+                // this change the position of recipient and requester for mapping the notify
+                NotifyManager.triggerNotify(NOTIFICATION_TYPES.acceptedRequest, recipientId, requesterId)
             }
             await TransactionQuery.commitTransaction()
         }

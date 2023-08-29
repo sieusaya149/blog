@@ -72,6 +72,11 @@ class FriendQuery {
         const friendRequestExistence = await this.isFriendRequestExist(requesterId, recipientId)
         if(friendRequestExistence)
         {
+            const previousAnswereRequest = await this.getStatusOfFriendRequest(requesterId, recipientId)
+            if(previousAnswereRequest == "Pending" )
+            {
+                throw new BadRequestError("Your request are waiting for answere")
+            }
             console.log("UPDATE existing friend request")
             await this.updateFriendRequest(requesterId, recipientId, status)
         }

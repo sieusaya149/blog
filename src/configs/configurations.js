@@ -200,4 +200,20 @@ const VERIFYCODE_TYPE = {
     FORGOT_PASSWORD : 'forgotPassword',
     VERIFY_EMAIL : 'verifyEmail'
 }
-module.exports = { DB_QUERYs, TIMEOUT, CONTRAINS_UPDATE_POST, CONTRAINS_UPDATE_USER, VERIFYCODE_TYPE}
+
+const LIST_EXCHANGE = {
+    notify: "notify_blog_exchange"
+}
+
+const NOTIFY_QUEUE = {
+    notify: "notify_blog_queue"
+}
+
+const NOTIFICATION_TYPES = {
+    friendRequest: "friendRequest",
+    acceptedRequest: "acceptedRequest"
+}
+
+module.exports = { DB_QUERYs, TIMEOUT, CONTRAINS_UPDATE_POST,
+                   CONTRAINS_UPDATE_USER, VERIFYCODE_TYPE,
+                   LIST_EXCHANGE, NOTIFICATION_TYPES, NOTIFY_QUEUE}
