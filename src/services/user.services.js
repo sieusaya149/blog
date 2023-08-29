@@ -110,8 +110,8 @@ class UserService
 
         try
         {
-            const listRequest = await FriendQuery.getAllFriendRequestsByStatus(recipientId, status)
-            return listRequest
+            const listRequests = await FriendQuery.getAllFriendRequestsByStatus(recipientId, status)
+            return {listRequests: listRequests}
         }
         catch (error) {
             throw new BadRequestError("Something went wrong when getting data")
@@ -210,6 +210,20 @@ class UserService
         }
         return {}
     }
+
+    static getMyFriends = async (req) => {
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError('Please give more information')
+        }
+        try {
+            const listFriends = await FriendQuery.getFriendOfUser(userId)
+            return {listFriends: listFriends}
+        } catch (error) {
+            throw new BadRequestError(error)
+        }
+    } 
 }
 
 

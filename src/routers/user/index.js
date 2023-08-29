@@ -22,6 +22,8 @@ router.post('/friend_request/:friendId', asyncHanlder(UserController.friendReque
 router.post('/answere_request/:requesterId', asyncHanlder(UserController.answereRequest))
 router.get('/friend_requests', asyncHanlder(UserController.getFriendRequest))
 router.delete('/unfriend/:friendId', asyncHanlder(UserController.unfriend))
+router.get('/myFriends', asyncHanlder(UserController.getMyFriends))
+
 
 
 module.exports = router

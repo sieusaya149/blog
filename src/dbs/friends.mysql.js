@@ -158,6 +158,19 @@ class FriendQuery {
             throw new BadRequestError("Some thing wrong when delete data")
         }
     }
+
+    async getFriendOfUser(userId)
+    {
+        const query = `SELECT FS.userBId AS userId,
+                            U.username,
+                            I.imageUrl AS avatar
+                        FROM FRIENDSHIPS FS
+                        LEFT JOIN USER U ON U.userId = FS.userBId
+                        LEFT JOIN IMAGE I ON I.userId = FS.userBId and I.topic = 'avatar'
+                        WHERE FS.userAId = ?`
+        const listFriends = await this.dbInstance.executeQueryV2(query, [userId]);
+        return listFriends
+    }
 }
 
 module.exports = new FriendQuery()
