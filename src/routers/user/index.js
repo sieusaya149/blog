@@ -24,6 +24,9 @@ router.get('/friend_requests', asyncHanlder(UserController.getFriendRequest))
 router.delete('/unfriend/:friendId', asyncHanlder(UserController.unfriend))
 router.get('/myFriends', asyncHanlder(UserController.getMyFriends))
 
+// notify
+router.get('/notifies', asyncHanlder(UserController.getAllNotify))
+
 
 
 module.exports = router

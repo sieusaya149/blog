@@ -7,6 +7,7 @@ const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE, NOTIFICATION_TYPES} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {NotifyManager} = require("./notification.services")
+const { getApi } = require('../helpers/callApi')
 class UserService
 {
     static getMyProfile = async (req) =>
@@ -223,7 +224,15 @@ class UserService
         } catch (error) {
             throw new BadRequestError(error)
         }
-    } 
+    }
+
+    static getAllNotify = async (req) => {
+        const userId = req.cookies.userId
+        const url = "http://notification_backend:3002/notifies/"+userId
+        console.log(url)
+        const data = await getApi(url)
+        return {data}
+    }
 }
 
 

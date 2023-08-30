@@ -97,6 +97,15 @@ class UserController {
         })
         msg.send(res)
     }
+
+    getAllNotify = async (req, res, next) => {
+        var metaData = await UserService.getAllNotify(req)
+        const msg = new OK({
+            message: "Get List Notifies Successfullys",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
 }
 
 module.exports = new UserController()
