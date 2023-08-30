@@ -125,6 +125,13 @@ class PostController
             metaData: await PostService.getAllPost(req)
         }).send(res)
     }
+
+    getAllPostV2 = async (req, res, next) => {
+        new CREATED({
+            message: "get all posts success!",
+            metaData: await PostService.getAllPostV2(req)
+        }).send(res)
+    }
     
 }
 

@@ -349,6 +349,20 @@ class PostService
             listPost: listPost
         }
     }
+
+    static getAllPostV2 = async (req) => {
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new AuthFailureError("Not Enough Info")
+        }
+        const numberPosts = await PostQuery.getNumberPostFollowedByUser(userId)
+        const listPost = await PostQuery.getPostByUserIdV2(userId, numberPosts)
+        return {
+            numberPosts: numberPosts,
+            listPost: listPost
+        }
+    }
     
 }
 

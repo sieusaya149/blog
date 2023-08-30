@@ -52,7 +52,6 @@ class FriendQuery {
         if(status)
         {
             query = query +  " AND FR.status = ?" 
-            console.log(query)
             listParams.push(status)
         }
         try {

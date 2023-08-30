@@ -41,6 +41,8 @@ router.post('/like/:postId', asyncHanlder(PostController.likePost))
 
 
 router.get('/allPost', asyncHanlder(PostController.getAllPost))
+router.get('/allPost_v2', asyncHanlder(PostController.getAllPostV2))
+
 
 router.get('/:postId', asyncHanlder(PostController.getPost))
 

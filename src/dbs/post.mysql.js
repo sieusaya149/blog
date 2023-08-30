@@ -179,6 +179,48 @@ class PostQuery {
       }
     }
 
+    async getPostByUserIdV2(userId, numberPosts)
+    {
+      try {
+        const getPost =  `SELECT P.postId,
+                                P.title,
+                                P.summarize,
+                                P.created_at,
+                                P.updated_at,
+                                U1.userId,
+                                U1.userName,
+                                I1.imageUrl AS thumbnailUrl,
+                                I2.imageUrl AS avatarUrl
+                          FROM POST P 
+                          LEFT JOIN USER AS U1 ON U1.userId = P.userId
+                          LEFT JOIN IMAGE AS I1 ON P.postId = I1.postId and I1.topic='thumnail'
+                          LEFT JOIN IMAGE AS I2 ON P.userId = I2.userId and I2.topic='avatar'
+                          LEFT JOIN FRIENDSHIPS AS F ON F.userAId = U1.userId AND F.userBId = ?
+                          WHERE U1.userId = ? OR F.userBId = ?
+                          ORDER BY P.updated_at DESC`
+        const postData = await this.dbInstance.executeQueryV2(getPost, [userId, userId, userId]);
+        if(postData.length == numberPosts)
+        {
+          let postSummarizeContents = []
+          let index = 0
+          postData.forEach(element => {
+              let postSummarize = new PostSummarizeContent(element, index)
+              postSummarizeContents.push(postSummarize.getSantilizedPostData())
+              index = index + 1
+          });
+          return postSummarizeContents
+        }
+        else
+        {
+          return null
+        }
+      }
+      catch (error) {
+        console.log(error)
+        return null
+      }
+    }
+
     async getNumberPostOfUser(userId)
     {
       try {
@@ -190,6 +232,27 @@ class PostQuery {
         return null
       }
     }
+
+    async getNumberPostFollowedByUser(userId)
+    {
+      try {
+        const numsPostQuery = `SELECT COUNT(*) as numberPost
+                                FROM POST P 
+                                LEFT JOIN USER AS U1 ON U1.userId = P.userId
+                                LEFT JOIN IMAGE AS I1 ON P.postId = I1.postId and I1.topic='thumnail'
+                                LEFT JOIN IMAGE AS I2 ON P.userId = I2.userId and I2.topic='avatar'
+                                LEFT JOIN FRIENDSHIPS AS F ON F.userAId = U1.userId AND F.userBId = ?
+                                WHERE U1.userId = ? OR F.userBId = ?;`;
+        const result = await this.dbInstance.executeQueryV2(numsPostQuery, [userId, userId, userId]);
+        console.log(result)
+        return result[0]['numberPost']
+      }
+      catch (error) {
+        return null
+      }
+    }
+
+
 
     // FIXME I think getCategory should not is the method of the class
     async getCategory(categroryName)

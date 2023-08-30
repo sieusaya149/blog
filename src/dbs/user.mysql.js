@@ -49,7 +49,7 @@ class UserQuery {
 
     async getBasicUserDataById(userId) {
         try {
-        const query = `SELECT U.userName, U.email, I.imageUrl
+        const query = `SELECT U.userId, U.userName, I.imageUrl
                        FROM USER U
                        LEFT JOIN IMAGE I ON U.userId = I.userId AND I.topic='avatar'\
                        WHERE U.userId = ?`
