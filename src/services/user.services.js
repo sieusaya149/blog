@@ -4,7 +4,7 @@ const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
-const {TIMEOUT, VERIFYCODE_TYPE, NOTIFICATION_TYPES} = require('../configs/configurations')
+const {TIMEOUT, VERIFYCODE_TYPE, NOTIFICATION_CONFIG} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {NotifyManager} = require("./notification.services")
 const { getApi } = require('../helpers/callApi')
@@ -137,7 +137,7 @@ class UserService
             const status = "Pending"
             await FriendQuery.upsertNewFriendRequest(requesterId, recipientId, status)
             // trigger sending notify for friend request event
-            NotifyManager.triggerNotify(NOTIFICATION_TYPES.friendRequest, requesterId, recipientId)
+            NotifyManager.triggerNotify(NOTIFICATION_CONFIG?.TYPES?.friendRequest, requesterId, recipientId)
             await TransactionQuery.commitTransaction()
         } catch (error) {
             await TransactionQuery.rollBackTransaction()
@@ -201,7 +201,7 @@ class UserService
                 await FriendQuery.addNewFriendShip(recipientId, requesterId)
                 // trigger sending notify for answere request event
                 // this change the position of recipient and requester for mapping the notify
-                NotifyManager.triggerNotify(NOTIFICATION_TYPES.acceptedRequest, recipientId, requesterId)
+                NotifyManager.triggerNotify(NOTIFICATION_CONFIG?.TYPES?.acceptedRequest, recipientId, requesterId)
             }
             await TransactionQuery.commitTransaction()
         }

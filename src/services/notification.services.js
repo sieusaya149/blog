@@ -1,6 +1,6 @@
 const { BadRequestError } = require("../core/error.response");
 const UserQuery = require("../dbs/user.mysql")
-const {NOTIFICATION_TYPES, LIST_EXCHANGE, NOTIFY_QUEUE} = require("../configs/configurations");
+const {NOTIFICATION_CONFIG} = require("../configs/configurations");
 const RabbitMq = require("../messageQueue/init.rabbitmq");
 
 // Abstract Notify class
@@ -51,24 +51,24 @@ class NotifyAbstract {
 
     async publishNotification()
     {
-        const notifyMq = await RabbitMq.getInstance(LIST_EXCHANGE.notify)
+        const notifyMq = await RabbitMq.getInstance(NOTIFICATION_CONFIG?.EXCHANGES?.notify)
         const notifyJson = await this.toJsonObject()
         console.log(notifyJson)
-        notifyMq.publishObject(notifyJson, NOTIFY_QUEUE.notify)
+        notifyMq.publishObject(notifyJson, NOTIFICATION_CONFIG?.NOTIFY_QUEUES?.notify)
     }
 }
 
 class FriendRequestNotify extends NotifyAbstract {
     constructor(senderId, receiverId)
     {
-        super(NOTIFICATION_TYPES.friendRequest, senderId, receiverId)
+        super(NOTIFICATION_CONFIG?.TYPES?.friendRequest, senderId, receiverId)
     }
 } 
 
 class AnswereFriendRequestNotify extends NotifyAbstract {
     constructor(senderId, receiverId)
     {
-        super(NOTIFICATION_TYPES.acceptedRequest, senderId, receiverId)
+        super(NOTIFICATION_CONFIG?.TYPES?.acceptedRequest, senderId, receiverId)
     }
 }
 
@@ -81,9 +81,9 @@ class NotifyFactory {
   
     createNotify(type, senderId, receiverId) {
       switch (type) {
-        case NOTIFICATION_TYPES.friendRequest:
+        case NOTIFICATION_CONFIG?.TYPES?.friendRequest:
           return new FriendRequestNotify(senderId, receiverId);
-        case NOTIFICATION_TYPES.acceptedRequest:
+        case NOTIFICATION_CONFIG?.TYPES?.acceptedRequest:
           return new AnswereFriendRequestNotify(senderId, receiverId);
         default:
           throw new Error(`Unsupported notification type: ${type}`);

@@ -1,4 +1,4 @@
- 
+const ConfigLoader = require("../../configurationRepo/src/configLoader")
 
 const DB_QUERYs = {
     CREATE_USER_TABLE : "CREATE TABLE IF NOT EXISTS USER(\
@@ -201,19 +201,9 @@ const VERIFYCODE_TYPE = {
     VERIFY_EMAIL : 'verifyEmail'
 }
 
-const LIST_EXCHANGE = {
-    notify: "notify_blog_exchange"
-}
-
-const NOTIFY_QUEUE = {
-    notify: "notify_blog_queue"
-}
-
-const NOTIFICATION_TYPES = {
-    friendRequest: "friendRequest",
-    acceptedRequest: "acceptedRequest"
-}
+// loading configuration 
+const sharingConfig = ConfigLoader.getInstance()
+const NOTIFICATION_CONFIG = sharingConfig.getConfig()?.notifications
 
 module.exports = { DB_QUERYs, TIMEOUT, CONTRAINS_UPDATE_POST,
-                   CONTRAINS_UPDATE_USER, VERIFYCODE_TYPE,
-                   LIST_EXCHANGE, NOTIFICATION_TYPES, NOTIFY_QUEUE}
+                   CONTRAINS_UPDATE_USER, VERIFYCODE_TYPE, NOTIFICATION_CONFIG}
