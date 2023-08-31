@@ -7,7 +7,9 @@ const app = express()
 const cookieParser = require('cookie-parser')
 const path = require('path');
 const RabbitMq = require('./messageQueue/init.rabbitmq')
-const {LIST_EXCHANGE, NOTIFY_QUEUE} = require('./configs/configurations')
+const {LIST_EXCHANGE, NOTIFY_QUEUE} = require('./configs/configurations');
+const { notify } = require('./routers');
+const ConfigParser = require("../configurationRepo/src/configParser")
 require('dotenv').config()
 //A. init middeware
 // allow all site can access the API
@@ -34,6 +36,10 @@ require("./dbs/init.mysql")
 //C. init handle error
 app.use(express.static(path.join(__dirname, '..', 'uploads')))
 
+// loading configuration 
+const sharingConfig = ConfigParser.getInstance()
+notifyConfig = sharingConfig.getConfig()
+console.log(notifyConfig)
 // setup message queue
 RabbitMq.getInstance(LIST_EXCHANGE.notify, NOTIFY_QUEUE.notify)
 //init routes

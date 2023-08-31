@@ -1,0 +1,3 @@
+[submodule "configurationRepo"]
+	path = configurationRepo
+	url = https://github.com/sieusaya149/configurationRepo.git
