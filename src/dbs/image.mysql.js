@@ -23,7 +23,7 @@ class ImageData {
     {
       try {
         const getImageInserted = 'SELECT * FROM IMAGE WHERE imageUrl = ?';
-        const imageId = await this.dbInstance.executeQueryV2(getImageInserted, [imageUrl]);
+        const imageId = await this.dbInstance.hitQuery(getImageInserted, [imageUrl]);
         return imageId
       } catch (error) {
         throw new Error("Can not get image that was upserted")
@@ -36,12 +36,12 @@ class ImageData {
         if(topic == 'avatar' )
         {
           const queryAvatar = "SELECT * FROM IMAGE WHERE userId = ? AND topic = ?";
-          const avatarExisting = await this.dbInstance.executeQueryV2(queryAvatar, [userId, topic]);
+          const avatarExisting = await this.dbInstance.hitQuery(queryAvatar, [userId, topic]);
           if(avatarExisting.length == 1)
           {
             // FIXME should delete image on disk also
             const query = "UPDATE IMAGE set imageUrl = ? where userId = ? and topic = ?"
-            const result = await this.dbInstance.executeQueryV2(query, [imageUrl, userId, topic])
+            const result = await this.dbInstance.hitQuery(query, [imageUrl, userId, topic])
             if(result.affectedRows == 0)
             {
               throw new Error("No Avatar was updated")
@@ -53,12 +53,12 @@ class ImageData {
         else if (topic == 'thumnail')
         {
           const queryThumbnail = "SELECT * FROM IMAGE WHERE postId = ? AND topic = ?";
-          const thumbnailExisting = await this.dbInstance.executeQueryV2(queryThumbnail, [postId, topic]);
+          const thumbnailExisting = await this.dbInstance.hitQuery(queryThumbnail, [postId, topic]);
           if(thumbnailExisting.length == 1)
           {
               // FIXME should delete image on disk also
               const query = "UPDATE IMAGE set imageUrl = ? where postId = ? and topic = ?"
-              const result = await this.dbInstance.executeQueryV2(query, [imageUrl, postId, topic])
+              const result = await this.dbInstance.hitQuery(query, [imageUrl, postId, topic])
               if(result.affectedRows == 0)
               {
                 throw new Error("No Thumbnail was updated")
@@ -70,7 +70,7 @@ class ImageData {
         // inserted new
         const query = 'INSERT INTO IMAGE (imageId, imageUrl, topic, postId, userId)\
                         VALUES (UUID(), ?, ?, ?, ?)';
-        const result = await this.dbInstance.executeQueryV2(query, [imageUrl, topic, postId, userId]);
+        const result = await this.dbInstance.hitQuery(query, [imageUrl, topic, postId, userId]);
         if(result.affectedRows != 1)
         {
           throw new Error("Can not insert new image")

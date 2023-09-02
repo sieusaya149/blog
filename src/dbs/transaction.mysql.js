@@ -7,8 +7,8 @@ class TransactionQuery {
     async startTransaction() {
         try {
             const query = 'START TRANSACTION';
-            const results = this.dbInstance.executeQuery(query);
-            console.log(results.sql)
+            const results = await this.dbInstance.hitQuery(query);
+            console.log("START TRANSACTION")
         } catch (error) {
             throw new Error("Issue Happen when start transaction")
         }
@@ -17,8 +17,8 @@ class TransactionQuery {
     async rollBackTransaction() {
         try {
             const query = 'ROLLBACK';
-            const results = this.dbInstance.executeQuery(query);
-            console.log(results.sql)
+            const results = await this.dbInstance.hitQuery(query);
+            console.log("ROLLBACK TRANSACTION")
         } catch (error) {
             throw new Error("Issue Happen when rollback transaction")
         }
@@ -28,9 +28,8 @@ class TransactionQuery {
     {
         try {
             const query = 'COMMIT';
-            const results = this.dbInstance.executeQuery(query);
-            console.log(results.sql)
-
+            const results = await this.dbInstance.hitQuery(query);
+            console.log("COMMIT TRANSACTION")
           } catch (error) {
             throw new Error("Issue Happen when commit transaction")
           }

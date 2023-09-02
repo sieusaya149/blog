@@ -12,7 +12,7 @@ class FriendQuery {
         const query = 'INSERT INTO FRIEND_REQUESTS (requestId, requesterId, recipientId, status)\
                         VALUES (UUID(), ?, ?, ?)';
         try {
-            const insertResult = await this.dbInstance.executeQueryV2(query, [requesterId, recipientId, status]);
+            const insertResult = await this.dbInstance.hitQuery(query, [requesterId, recipientId, status]);
             if(insertResult.affectedRows != 1)
             {
                 throw new Error("Insert new friend request failed")
@@ -28,7 +28,7 @@ class FriendQuery {
         if(status == 'Accepted' || status == 'Rejected' || status == 'Pending')
         {
             const query = "UPDATE FRIEND_REQUESTS set status = ? where requesterId = ? and recipientId = ?"
-            await this.dbInstance.executeQueryV2(query, [status, requesterId, recipientId])
+            await this.dbInstance.hitQuery(query, [status, requesterId, recipientId])
         }
         else
         {
@@ -55,7 +55,7 @@ class FriendQuery {
             listParams.push(status)
         }
         try {
-            const listFriendRequest = await this.dbInstance.executeQueryV2(query, listParams);
+            const listFriendRequest = await this.dbInstance.hitQuery(query, listParams);
             return listFriendRequest
         }
         catch (error) {
@@ -105,14 +105,14 @@ class FriendQuery {
             query = query +  "AND status = ?"
             listParams.push(status)
         }
-        const result = await this.dbInstance.executeQueryV2(query, listParams);
+        const result = await this.dbInstance.hitQuery(query, listParams);
         return result[0]?.['COUNT(*)'] == 1
     }
 
     async getStatusOfFriendRequest(requesterId, recipientId)
     {
         const query = "SELECT status FROM FRIEND_REQUESTS WHERE requesterId = ? AND recipientId = ?";
-        const result = await this.dbInstance.executeQueryV2(query, [requesterId, recipientId]);
+        const result = await this.dbInstance.hitQuery(query, [requesterId, recipientId]);
         return result[0]?.['status']
     }
 
@@ -129,14 +129,14 @@ class FriendQuery {
         VALUES (UUID(), ?, ?),
                (UUID(), ?, ?)`;
 
-        await this.dbInstance.executeQueryV2(query, [userAId, userBId, userBId, userAId]);
+        await this.dbInstance.hitQuery(query, [userAId, userBId, userBId, userAId]);
     }
 
     async checkIfTheyAreFriend(requesterId, recipientId)
     {
         const query = "SELECT COUNT(*) FROM FRIENDSHIPS\
                        WHERE userAId = ? and userBId = ?";
-        const result = await this.dbInstance.executeQueryV2(query, [requesterId, recipientId]);
+        const result = await this.dbInstance.hitQuery(query, [requesterId, recipientId]);
         return result[0]?.['COUNT(*)'] == 1
     
     }
@@ -151,7 +151,7 @@ class FriendQuery {
         const deleteQuery = `DELETE FROM FRIENDSHIPS
                              WHERE (userAId = ? AND userBId = ?)
                              OR (userAId = ? AND userBId = ?)`;
-        const result = await this.dbInstance.executeQueryV2(deleteQuery, [userAId, userBId, userBId, userAId]);
+        const result = await this.dbInstance.hitQuery(deleteQuery, [userAId, userBId, userBId, userAId]);
         if(result.affectedRows != 2)
         {
             throw new BadRequestError("Some thing wrong when delete data")
@@ -167,7 +167,7 @@ class FriendQuery {
                         LEFT JOIN USER U ON U.userId = FS.userBId
                         LEFT JOIN IMAGE I ON I.userId = FS.userBId and I.topic = 'avatar'
                         WHERE FS.userAId = ?`
-        const listFriends = await this.dbInstance.executeQueryV2(query, [userId]);
+        const listFriends = await this.dbInstance.hitQuery(query, [userId]);
         return listFriends
     }
 }

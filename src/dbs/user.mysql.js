@@ -8,7 +8,7 @@ class UserQuery {
     async checkUserExist(username, email) {
         try {
             const query = 'SELECT COUNT(*) as count FROM USER WHERE username = ? OR email = ?';
-            const results = await this.dbInstance.executeQueryV2(query, [username, email]);
+            const results = await this.dbInstance.hitQuery(query, [username, email]);
             const count = results[0].count;
             return count > 0? true: false;
         } catch (error) {
@@ -20,7 +20,7 @@ class UserQuery {
     async checkUserExistById(userId) {
         try {
             const query = 'SELECT COUNT(*) as count FROM USER WHERE userId = ?';
-            const results = await this.dbInstance.executeQueryV2(query, [userId]);
+            const results = await this.dbInstance.hitQuery(query, [userId]);
             const count = results[0].count;
             return count > 0? true: false;
         } catch (error) {
@@ -32,7 +32,7 @@ class UserQuery {
     async getUserById(userId) {
         try {
         const query = 'SELECT * FROM USER WHERE userId = ?';
-        const results = await this.dbInstance.executeQueryV2(query, [userId]);
+        const results = await this.dbInstance.hitQuery(query, [userId]);
         if(results.length !=1)
         {
             throw new Error (`More than one user has same id ${userId}`)
@@ -53,7 +53,7 @@ class UserQuery {
                        FROM USER U
                        LEFT JOIN IMAGE I ON U.userId = I.userId AND I.topic='avatar'\
                        WHERE U.userId = ?`
-        const results = await this.dbInstance.executeQueryV2(query, [userId]);
+        const results = await this.dbInstance.hitQuery(query, [userId]);
         if(results.length !=1)
         {
             throw new Error (`Some thing wrong related to userData`)
@@ -71,7 +71,7 @@ class UserQuery {
     async getUserFromMail(email) {
         try {
         const query = 'SELECT * FROM USER WHERE email = ?';
-        const results = await this.dbInstance.executeQueryV2(query, [email]);
+        const results = await this.dbInstance.hitQuery(query, [email]);
         if(results.length !=1)
         {
             throw new Error (`More than one user use ${email}`)
@@ -90,7 +90,7 @@ class UserQuery {
     {
         try {
             const query = 'SELECT * FROM USER WHERE username = ? ';
-            const result = await this.dbInstance.executeQueryV2(query, [username]);
+            const result = await this.dbInstance.hitQuery(query, [username]);
             return result.length != 0? result[0]: null;
         }
         catch (error) {
@@ -102,7 +102,7 @@ class UserQuery {
     async updatePassword(newPassword, userId) {
         try {
         const query = 'UPDATE USER set password = ? WHERE userId = ?';
-        await this.dbInstance.executeQueryV2(query, [newPassword, userId]);
+        await this.dbInstance.hitQuery(query, [newPassword, userId]);
         return userId;
         } catch (error) {
         console.error(error);
@@ -115,7 +115,7 @@ class UserQuery {
         // we have 2 query, first for inserting, the second for getting the lastest id that
         // was inserted
         const query = 'INSERT INTO USER (userId, userName, email, password, birthDay) VALUES (UUID(), ?, ?, ?, ?)';
-        await this.dbInstance.executeQueryV2(query, [username, email, password, birthDay]);
+        await this.dbInstance.hitQuery(query, [username, email, password, birthDay]);
         const newUser = await this.getUserFromMail(email)
         return newUser.userId
     }
@@ -123,7 +123,7 @@ class UserQuery {
     async updateUserProfile(queriesData, userId)
     {
         const {query, queryParams, emailChange} =  SqlBuilder.dynamicSqlForUpdateUserByUserId(queriesData, userId)
-        await this.dbInstance.executeQueryV2(query, queryParams)
+        await this.dbInstance.hitQuery(query, queryParams)
         if(emailChange)
         {
             this.updateVerifiedStatus(false, userId)
@@ -134,7 +134,7 @@ class UserQuery {
     async deleteUser(userId)
     {
       const query = 'DELETE FROM USER WHERE userId = ?'
-      const result = await this.dbInstance.executeQueryV2(query, [userId]);
+      const result = await this.dbInstance.hitQuery(query, [userId]);
       console.log(result)
       return result
     } 
@@ -142,7 +142,7 @@ class UserQuery {
     async updateVerifiedStatus(status, userId)
     {
         const query = 'UPDATE USER SET verified = ? WHERE userId = ?'
-        const result = await this.dbInstance.executeQueryV2(query, [status, userId]);
+        const result = await this.dbInstance.hitQuery(query, [status, userId]);
     }
 }
 

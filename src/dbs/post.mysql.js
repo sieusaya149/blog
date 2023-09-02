@@ -71,7 +71,7 @@ class PostQuery {
         const query = 'INSERT INTO POST (postId, title, statusEdit, sharePermission , summarize,\
                        content, userId) \
                        VALUES (?, ?, ?, ?, ?, ?, ?)';
-        await this.dbInstance.executeQueryV2(query, [postId, title, statusEdit, sharePermit,
+        await this.dbInstance.hitQuery(query, [postId, title, statusEdit, sharePermit,
                                                      summarize, content, userId]);
         await this.updatePostCategoryTable(postId, categoryId)
         return postId;
@@ -85,7 +85,7 @@ class PostQuery {
     async updatePostCategoryTable(postId, categroryId)
     {
       const checkQuery = "SELECT COUNT(*) as count from POSTCATEGORY WHERE postId = ? AND categroryId = ?"
-      const result = await this.dbInstance.executeQueryV2(checkQuery, [postId, categroryId]);
+      const result = await this.dbInstance.hitQuery(checkQuery, [postId, categroryId]);
       if(result[0].count > 0)
       {
         console.log("Do not need update categrory")
@@ -93,21 +93,21 @@ class PostQuery {
       else
       {
         const updatePostCategory = 'INSERT INTO POSTCATEGORY (postId, categroryId) VALUES (?, ?)';
-        await this.dbInstance.executeQueryV2(updatePostCategory, [postId, categroryId]);
+        await this.dbInstance.hitQuery(updatePostCategory, [postId, categroryId]);
       }
     }
 
     async updatePost(queriesData, postId, categroryId)
     {
       const {query, queryParams} = SqlBuilder.dynamicSqlForUpdatePostByPostId(queriesData, postId)
-      await this.dbInstance.executeQueryV2(query, queryParams);
+      await this.dbInstance.hitQuery(query, queryParams);
       await this.updatePostCategoryTable(postId, categroryId)
     }
 
     async deletePost(postId)
     {
       const query = 'DELETE FROM POST WHERE postId = ?'
-      const result = await this.dbInstance.executeQueryV2(query, [postId]);
+      const result = await this.dbInstance.hitQuery(query, [postId]);
     }
 
 
@@ -115,7 +115,7 @@ class PostQuery {
     {
       try {
         const getPost = 'SELECT * FROM POST WHERE postId = ?';
-        const postData = await this.dbInstance.executeQueryV2(getPost, [postId]);
+        const postData = await this.dbInstance.hitQuery(getPost, [postId]);
         if(postData.length == 1)
         {
           return postData[0]
@@ -156,7 +156,7 @@ class PostQuery {
                             p.userId = ?\
                         ORDER BY\
                         p.created_at DESC;";
-        const postData = await this.dbInstance.executeQueryV2(getPost, [userId]);
+        const postData = await this.dbInstance.hitQuery(getPost, [userId]);
         if(postData.length == numberPosts)
         {
           let postSummarizeContents = []
@@ -198,7 +198,7 @@ class PostQuery {
                           LEFT JOIN FRIENDSHIPS AS F ON F.userAId = U1.userId AND F.userBId = ?
                           WHERE U1.userId = ? OR F.userBId = ?
                           ORDER BY P.updated_at DESC`
-        const postData = await this.dbInstance.executeQueryV2(getPost, [userId, userId, userId]);
+        const postData = await this.dbInstance.hitQuery(getPost, [userId, userId, userId]);
         if(postData.length == numberPosts)
         {
           let postSummarizeContents = []
@@ -225,7 +225,7 @@ class PostQuery {
     {
       try {
         const numsPostQuery = 'SELECT COUNT(*) FROM POST WHERE userId = ?';
-        const result = await this.dbInstance.executeQueryV2(numsPostQuery, [userId]);
+        const result = await this.dbInstance.hitQuery(numsPostQuery, [userId]);
         return result[0]['COUNT(*)']
       }
       catch (error) {
@@ -243,7 +243,7 @@ class PostQuery {
                                 LEFT JOIN IMAGE AS I2 ON P.userId = I2.userId and I2.topic='avatar'
                                 LEFT JOIN FRIENDSHIPS AS F ON F.userAId = U1.userId AND F.userBId = ?
                                 WHERE U1.userId = ? OR F.userBId = ?;`;
-        const result = await this.dbInstance.executeQueryV2(numsPostQuery, [userId, userId, userId]);
+        const result = await this.dbInstance.hitQuery(numsPostQuery, [userId, userId, userId]);
         console.log(result)
         return result[0]['numberPost']
       }
@@ -259,7 +259,7 @@ class PostQuery {
     {
       try {
         const query = 'SELECT * FROM CATEGORY WHERE categroryName = ? ';
-        const result =await this.dbInstance.executeQueryV2(query, [categroryName]);
+        const result =await this.dbInstance.hitQuery(query, [categroryName]);
         return result.length > 0? result[0]: null;
       }
       catch (error) {
@@ -270,7 +270,7 @@ class PostQuery {
     async updatePostStatus(status, postId)
     {
       const query = "UPDATE POST set statusEdit = ? where postId = ?"
-      const result = await this.dbInstance.executeQueryV2(query, [status, postId])
+      const result = await this.dbInstance.hitQuery(query, [status, postId])
       if(result.affectedRows == 0)
       {
         throw new Error("No PostId was updated to unpublish")
@@ -282,7 +282,7 @@ class PostQuery {
       if(commendId)
       {
         const query = "UPDATE COMMENT set commentText = ?, postId = ?, userId = ?, parentCommentId=? where commentId = ?"
-        const result = await this.dbInstance.executeQueryV2(query, [commentText, postId, userId, parentCommentId, commendId])
+        const result = await this.dbInstance.hitQuery(query, [commentText, postId, userId, parentCommentId, commendId])
         if(result.affectedRows == 0)
         {
           throw new Error("No Comment was updated")
@@ -292,7 +292,7 @@ class PostQuery {
       {
         const query = "INSERT INTO COMMENT  (commentId, commentText, postId, userId, parentCommentId) \
                        VALUES(UUID(), ?, ?, ?, ?)"
-        const result = await this.dbInstance.executeQueryV2(query, [commentText, postId, userId, parentCommentId])
+        const result = await this.dbInstance.hitQuery(query, [commentText, postId, userId, parentCommentId])
         if(result.affectedRows != 1)
         {
           throw new Error("Can not insert new comment")
@@ -304,12 +304,12 @@ class PostQuery {
     async upSertLikeForPost(postId, userId)
     {
       const checkQuery = "SELECT * from LIKE_EMOTION WHERE postId = ? AND userId = ?"
-      var result = await this.dbInstance.executeQueryV2(checkQuery, [postId, userId]);
+      var result = await this.dbInstance.hitQuery(checkQuery, [postId, userId]);
       if(result.length == 1)
       {
         console.log(`Dislike Post ${postId}`)
         const deleteLikeQuery = "DELETE FROM LIKE_EMOTION WHERE likeId = ?"
-        result = await this.dbInstance.executeQueryV2(deleteLikeQuery, [result[0].likeId]);
+        result = await this.dbInstance.hitQuery(deleteLikeQuery, [result[0].likeId]);
         if(result.affectedRows != 1)
         {
           throw new Error("Can not DisLike Post")
@@ -319,7 +319,7 @@ class PostQuery {
       {
         console.log(`Like Post ${postId}`)
         const updateLike = 'INSERT INTO LIKE_EMOTION (likeId, postId, userId) VALUES (UUID(), ?, ?)';
-        result = await this.dbInstance.executeQueryV2(updateLike, [postId, userId]);
+        result = await this.dbInstance.hitQuery(updateLike, [postId, userId]);
         if(result.affectedRows != 1)
         {
           throw new Error("Can not Like Post")
@@ -332,7 +332,7 @@ class PostQuery {
     {
       try {
         const getCommentSql = 'SELECT commentId, commentText, userId FROM COMMENT WHERE commentId = ?';
-        const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [commentId]);
+        const commentData = await this.dbInstance.hitQuery(getCommentSql, [commentId]);
         if(commentData.length == 1)
         {
           return commentData[0]
@@ -354,7 +354,7 @@ class PostQuery {
         const getCommentSql = 'SELECT commentId, commentText, userId, updated_at, created_at FROM COMMENT \
                                WHERE parentCommentId = ? \
                                ORDER BY created_at DESC';
-        const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [parentCommentId]);
+        const commentData = await this.dbInstance.hitQuery(getCommentSql, [parentCommentId]);
         if(commentData.length > 0)
         {
           return commentData
@@ -377,7 +377,7 @@ class PostQuery {
         const getCommentSql = `SELECT commentId, commentText, userId, updated_at, created_at FROM COMMENT \
                                WHERE postId = ? ${appendQuery}\
                                ORDER BY created_at DESC`;
-        const commentData = await this.dbInstance.executeQueryV2(getCommentSql, [postId]);
+        const commentData = await this.dbInstance.hitQuery(getCommentSql, [postId]);
         console.log(commentData)
         if(commentData.length > 0)
         {
@@ -399,7 +399,7 @@ class PostQuery {
     {
       try {
         const deleteCommentSql = 'DELETE FROM COMMENT WHERE commentId = ?  and userId = ?';
-        const commentData = await this.dbInstance.executeQueryV2(deleteCommentSql, [commentId, userId]);
+        const commentData = await this.dbInstance.hitQuery(deleteCommentSql, [commentId, userId]);
         console.log(commentData)
         if(commentData.affectedRows == 1)
         {

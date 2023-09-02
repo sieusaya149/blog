@@ -66,9 +66,8 @@ class AccessService
         5 - get data return login
     */ 
     static login = async ({username, email, password}) => {
-        // const exist = await instanceMySqlDB.checkUserExist(username, "")
 
-        const userInstance =  await instanceMySqlDB.getUserName(username)
+        const userInstance =  await UserQuery.getUserName(username)
         // for case db has problem
         if(userInstance == null)
         {

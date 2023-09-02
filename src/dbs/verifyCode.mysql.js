@@ -11,7 +11,7 @@ class VerifyCodeQuery {
     {
         try {
             const query = 'SELECT * FROM VERIFYCODE WHERE userId = ? '
-            const results = await this.dbInstance.executeQueryV2(query, [userId]);
+            const results = await this.dbInstance.hitQuery(query, [userId]);
             if(results.length >= 1)
             {
                 return results[0]
@@ -30,7 +30,7 @@ class VerifyCodeQuery {
     {
         try {
             const query = "SELECT *  FROM VERIFYCODE WHERE code = ? AND userId = ? AND typeCode = ?"
-            const results = await this.dbInstance.executeQueryV2(query, [code, userId, typeCode]);
+            const results = await this.dbInstance.hitQuery(query, [code, userId, typeCode]);
             if(results.length == 1)
             {
               return results[0]
@@ -57,17 +57,17 @@ class VerifyCodeQuery {
                   codeId = existingCode.codeId
                   query = 'UPDATE VERIFYCODE SET code = ? , expireTime = ?, typeCode = ?  \
                           WHERE codeId = ?';
-                  await this.dbInstance.executeQueryV2(query, [code, expireDate, typeCode, codeId]);
+                  await this.dbInstance.hitQuery(query, [code, expireDate, typeCode, codeId]);
               }
               else
               {
                   query = 'INSERT INTO VERIFYCODE (codeId, code, expireTime, typeCode, userId) \
                   VALUES (UUID(), ?, ?, ?, ?)';
-                  await this.dbInstance.executeQueryV2(query, [code, expireDate, typeCode, userId]);
+                  await this.dbInstance.hitQuery(query, [code, expireDate, typeCode, userId]);
               }
 
               const verifyCodeSql = 'SELECT * FROM VERIFYCODE WHERE userId = ?';
-              const verifyCode = await this.dbInstance.executeQueryV2(verifyCodeSql, [userId]);
+              const verifyCode = await this.dbInstance.hitQuery(verifyCodeSql, [userId]);
               console.log(verifyCode)
               return verifyCode;
             } catch (error) {
@@ -88,7 +88,7 @@ class VerifyCodeQuery {
         throw new Error("The code does not exist")
       }
       const query = 'DELETE FROM VERIFYCODE WHERE code = ? AND userId = ? '
-      const results = await this.dbInstance.executeQueryV2(query, [code, userId]);
+      const results = await this.dbInstance.hitQuery(query, [code, userId]);
       if(results.affectedRows == 1) 
       {
         return true
