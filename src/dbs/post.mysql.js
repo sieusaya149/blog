@@ -2,7 +2,8 @@ const instanceMySqlDB = require('./init.mysql');
 const { post } = require('../routers');
 const { v4: uuidv4 } = require('uuid');
 
-const SqlBuilder = require('../utils/sqlBuilder')
+const SqlBuilder = require('../utils/sqlBuilder');
+const QueryBase = require('./queryBase');
 
 class PostSummarizeContent {
   constructor(postData, index) {
@@ -58,10 +59,10 @@ class PostSummarizeContent {
     };
   }
 }
-class PostQuery {
+class PostQuery extends QueryBase{
     constructor()
     {
-        this.dbInstance = instanceMySqlDB
+        super()
     }
     async insertPostToDb(title, statusEdit, sharePermit, summarize, content,
                          userId, categoryId)

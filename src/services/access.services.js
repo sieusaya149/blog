@@ -1,5 +1,6 @@
 const instanceMySqlDB = require('../dbs/init.mysql')
 const UserQuery  = require('../dbs/user.mysql')
+const KeyStoreQuery = require('../dbs/keystore.mysql')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const {createTokenPair} = require("../auth/authUtils")
@@ -39,7 +40,7 @@ class AccessService
             const tokens = await createTokenPair({userId: newUser, email: email},
                                                  publicKey,
                                                  privateKey)
-            const newKey = await instanceMySqlDB.addKeyStore(publicKey,
+            const newKey = await KeyStoreQuery.addKeyStore(publicKey,
                                                             privateKey,
                                                             tokens.accessToken,
                                                             tokens.refreshToken,
@@ -90,7 +91,7 @@ class AccessService
         const tokens = await createTokenPair({userId: instanceId, email: email},
                                                  publicKey,
                                                  privateKey)
-        const newKey = await instanceMySqlDB.addKeyStore(publicKey,
+        const newKey = await KeyStoreQuery.addKeyStore(publicKey,
                                                          privateKey,
                                                          tokens.accessToken,
                                                          tokens.refreshToken,
@@ -111,7 +112,7 @@ class AccessService
     static logout = async (keyStore) =>{
         //FIX ME USER ID need take from the access token rather than the request body
         console.log("clear key store")
-        const delKey = await instanceMySqlDB.deleteKeyStore(keyStore.userId)
+        const delKey = await KeyStoreQuery.deleteKeyStore(keyStore.userId)
         console.log(`${delKey}`)
         return delKey
     }

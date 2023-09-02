@@ -1,9 +1,10 @@
 const instanceMySqlDB = require('./init.mysql');
+const QueryBase = require('./queryBase')
 const SqlBuilder = require('../utils/sqlBuilder')
-class UserQuery {
+class UserQuery extends QueryBase {
     constructor()
     {
-        this.dbInstance = instanceMySqlDB
+        super()
     }
     async checkUserExist(username, email) {
         try {

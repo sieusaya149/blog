@@ -1,11 +1,12 @@
 const instanceMySqlDB = require('./init.mysql');
 const { post } = require('../routers');
 const { BadRequestError } = require('../core/error.response');
+const QueryBase = require('./queryBase');
 
-class ImageData {
+class ImageData extends QueryBase{
     constructor()
     {
-        this.dbInstance = instanceMySqlDB
+      super()
     }
     async insertImageToDb(imageUrl, topic, userId=null, postId=null)
     {

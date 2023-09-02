@@ -4,6 +4,7 @@ const {asyncHanlder} = require('../helpers/asyncHandler')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const VerifyCodeQuery = require("../dbs/verifyCode.mysql")
 const { VERIFYCODE_TYPE } = require('../configs/configurations')
+const KeyStoreQuery = require("../dbs/keystore.mysql")
 // FIX me because currently in the source code, the keys are not key pair
 // so that we only use private key
 const createTokenPair = async (payload, publicKey, privateKey) => {
@@ -49,7 +50,7 @@ const authentication = asyncHanlder(async (req, res, next) => {
        throw new AuthFailureError('Invalid request')
    }
    //2
-   const keyStore = await instanceMySqlDB.getKeyStore(userId)
+   const keyStore = await KeyStoreQuery.getKeyStore(userId)
 //    console.log(`Key store maybe is ${keyStore}`)
    if(keyStore == null)
    {

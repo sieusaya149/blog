@@ -1,11 +1,12 @@
 const instanceMySqlDB = require('./init.mysql');
 const { v4: uuidv4 } = require('uuid');
 const { VERIFYCODE_TYPE } = require('../configs/configurations');
+const QueryBase = require('./queryBase');
 
-class VerifyCodeQuery {
+class VerifyCodeQuery extends QueryBase {
     constructor()
     {
-        this.dbInstance = instanceMySqlDB
+      super()
     }
     async checkCodeForUserExist(userId)
     {

@@ -1,10 +1,11 @@
 const instanceMySqlDB = require('./init.mysql');
 const UserQuery = require('./user.mysql')
 const { BadRequestError } = require('../core/error.response');
-class FriendQuery {
+const QueryBase = require('./queryBase');
+class FriendQuery extends QueryBase {
     constructor()
     {
-        this.dbInstance = instanceMySqlDB
+        super()
     }
 
     async insertNewFriendRequest(requesterId, recipientId, status = "Pending")
