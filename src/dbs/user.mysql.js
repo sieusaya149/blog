@@ -95,7 +95,7 @@ class UserQuery extends QueryBase {
             return result.length != 0? result[0]: null;
         }
         catch (error) {
-            console.log(username)
+            console.log(error)
             return null
         }
     }

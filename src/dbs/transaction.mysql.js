@@ -7,8 +7,9 @@ class TransactionQuery extends QueryBase {
     }
     async startTransaction() {
         try {
-            const query = 'START TRANSACTION;';
-            const results = await this.dbInstance.hitQuery(query);
+            const query = 'START TRANSACTION';
+            await this.dbInstance.createTransactionConnection()
+            await this.dbInstance.hitQuery(query);
             console.log("START TRANSACTION")
         } catch (error) {
             console.log(error)
@@ -18,10 +19,12 @@ class TransactionQuery extends QueryBase {
 
     async rollBackTransaction() {
         try {
-            const query = 'ROLLBACK;';
-            const results = await this.dbInstance.hitQuery(query);
+            const query = 'ROLLBACK';
+            await this.dbInstance.hitQuery(query);
+            this.dbInstance.removeTxConnection()
             console.log("ROLLBACK TRANSACTION")
         } catch (error) {
+            console.log(error)
             throw new Error("Issue Happen when rollback transaction")
         }
     }
@@ -29,10 +32,12 @@ class TransactionQuery extends QueryBase {
     async commitTransaction()
     {
         try {
-            const query = 'COMMIT;';
-            const results = await this.dbInstance.hitQuery(query);
+            const query = 'COMMIT';
+            await this.dbInstance.hitQuery(query);
+            this.dbInstance.removeTxConnection()
             console.log("COMMIT TRANSACTION")
           } catch (error) {
+            console.log(error)
             throw new Error("Issue Happen when commit transaction")
           }
     }
