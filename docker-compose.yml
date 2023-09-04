@@ -50,6 +50,21 @@ services:
           blog_network:
             aliases:
             - phpmyadmin
+    
+    utils:
+        build: 
+          context: ./script
+          dockerfile: Dockerfile
+        container_name: utils
+        volumes:
+          - ./utils/script:/script
+          - ./utils/data:/data
+        depends_on: 
+          - mysql
+        networks:
+          blog_network:
+            aliases:
+            - utils
 
 networks:
     blog_network:

@@ -1,4 +1,4 @@
-const ConfigLoader = require("../../configurationRepo/src/configLoader")
+const ConfigLoader = require("../../submodules/configurationRepo/src/configLoader")
 
 const DB_QUERYs = {
     CREATE_USER_TABLE : "CREATE TABLE IF NOT EXISTS USER(\

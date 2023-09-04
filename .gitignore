@@ -3,3 +3,4 @@ index.html
 /uploads/*
 /deployment
 /data/*
+/utils/data/backup/*.sql

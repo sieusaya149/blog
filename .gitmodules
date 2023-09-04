@@ -1,3 +1,3 @@
-[submodule "configurationRepo"]
-	path = configurationRepo
-	url = https://github.com/sieusaya149/configurationRepo.git
+[submodule "submodules/configurationRepo"]
+	path = submodules/configurationRepo
+	url = git@github.com:sieusaya149/configurationRepo.git
