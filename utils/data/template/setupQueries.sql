@@ -24,11 +24,22 @@ CREATE TABLE IF NOT EXISTS POST(postId CHAR(36),
 
 -- 3 create category table
 CREATE TABLE IF NOT EXISTS CATEGORY(categroryId CHAR(36),
-                                    categroryName VARCHAR(1500) NOT NULL,
+                                    categroryName VARCHAR(150) NOT NULL,
                                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                    PRIMARY KEY (categroryId));
-            
+                                    PRIMARY KEY (categroryId),
+                                    UNIQUE KEY unique_categroryName (categroryName));
+
+-- create default category 
+-- Insert category names into the CATEGORY table with UUIDs
+INSERT IGNORE INTO CATEGORY (categroryId, categroryName)
+VALUES
+    (UUID(), 'Technologies'),
+    (UUID(), 'Food'),
+    (UUID(), 'Travel'),
+    (UUID(), 'Sport'),
+    (UUID(), 'Others');
+
 -- 4 create tag table
 CREATE TABLE IF NOT EXISTS TAG(tagId CHAR(36),
                                tagName VARCHAR(1500) NOT NULL,
