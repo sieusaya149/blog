@@ -53,7 +53,7 @@ services:
     
     utils:
         build: 
-          context: ./script
+          context: ./utils
           dockerfile: Dockerfile
         container_name: utils
         volumes:
