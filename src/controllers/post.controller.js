@@ -132,6 +132,27 @@ class PostController
             metaData: await PostService.getAllPost(req)
         }).send(res)
     }
+
+    savePost = async (req, res, next) => {
+        new CREATED({
+            message: "save post success",
+            metaData: await PostService.savePost(req)
+        }).send(res)
+    }
+
+    unSavePost = async (req, res, next) => {
+        new CREATED({
+            message: "unsave post success",
+            metaData: await PostService.unSavePost(req)
+        }).send(res)
+    }
+
+    getSavePosts = async (req, res, next) => {
+        new CREATED({
+            message: "get save post success",
+            metaData: await PostService.getSavePosts(req)
+        }).send(res)
+    }
     
 }
 

@@ -6,12 +6,12 @@ const {asyncHanlder} = require('../../helpers/asyncHandler')
 const { authentication } = require('../../auth/authUtils')
 const PostController = require('../../controllers/post.controller')
 const {imageUpload} = require('../../helpers/uploadMulter')
+const { getMaxListeners } = require('nodemailer/lib/xoauth2')
 require('dotenv').config()
 
 router.use(authentication)
 
 
-// logout api
 router.post('/publish', asyncHanlder(PostController.publishPost))
 router.post('/publish_v2', imageUpload.single('thumbnail'),  asyncHanlder(PostController.publishPostWithThumbnail))
 router.put('/republish/:postId', asyncHanlder(PostController.rePublishPost))
@@ -37,6 +37,13 @@ router.post('/like/:postId', asyncHanlder(PostController.likePost))
 
 router.get('/allMyPost', asyncHanlder(PostController.getMyPosts))
 router.get('/allPost', asyncHanlder(PostController.getAllPost))
-router.get('/:postId', asyncHanlder(PostController.getPost))
+// router.get('/:postId', asyncHanlder(PostController.getPost))
+
+
+router.post('/savePost', asyncHanlder(PostController.savePost))
+router.get('/savePosts', asyncHanlder(PostController.getSavePosts))
+router.delete('/unSavePost', asyncHanlder(PostController.unSavePost))
+
+
 
 module.exports = router

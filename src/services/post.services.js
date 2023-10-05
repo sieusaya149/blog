@@ -2,10 +2,9 @@ const instanceMySqlDB = require('../dbs/init.mysql')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const path = require('path');
 const PostQuery = require('../dbs/post.mysql')
-const { get } = require('../routers');
-const { query } = require('express');
 const TransactionQuery = require('../dbs/transaction.mysql')
 const ImageData = require("../dbs/image.mysql")
+const {SaveListQuery, SavePostQuery} = require('../dbs/savePost.mysql')
 const POST_BODY = {
     POST_TITLE: 'postTitle',
     POST_STATUS: 'postStatus',
@@ -362,6 +361,51 @@ class PostService
             numberPosts: numberPosts,
             listPost: listPost
         }
+    }
+
+    static savePost = async (req) => {
+        const {postId, nameList} = req.body
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!postId || !nameList)
+        {
+            throw new BadRequestError("Please give postId nameList")
+        }
+        const savePostQuery = new SavePostQuery()
+        await savePostQuery.saveNewPost(userId, nameList, postId)
+    }
+
+    static unSavePost = async (req) => {
+        const {postId, nameList} = req.body
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!postId || !nameList)
+        {
+            throw new BadRequestError("Please give postId nameList")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.unsavePost(userId, nameList, postId)
+    }
+
+    static getSavePosts = async (req) => {
+        const {nameList} = req.body
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!nameList)
+        {
+            throw new BadRequestError("Please give  nameList")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.getSavedPost(nameList, userId)
     }
     
 }

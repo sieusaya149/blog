@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS LIKE_EMOTION(
 
 -- 16 create save list table
 CREATE TABLE IF NOT EXISTS SAVELIST(saveListId CHAR(36) NOT NULL,
-                                    nameSaveList VARCHAR(500) DEFAULT 'NO NAME',
+                                    nameSaveList VARCHAR(500) NOT NULL,
                                     userId CHAR(36) NOT NULL,
                                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -173,10 +173,12 @@ CREATE TABLE IF NOT EXISTS SAVELIST(saveListId CHAR(36) NOT NULL,
                                     FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE ON UPDATE CASCADE);
 
 -- 17 create save list post table for many -- many relationship
-CREATE TABLE IF NOT EXISTS SAVELIST_POST(saveListId CHAR(36) NOT NULL,
+CREATE TABLE IF NOT EXISTS SAVELIST_POST(saveListPostId CHAR(36) NOT NULL,
+                                        saveListId CHAR(36) NOT NULL,
                                         postId CHAR(36) NOT NULL,
                                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                        PRIMARY KEY (saveListId),
                                         FOREIGN KEY (saveListId) REFERENCES SAVELIST(saveListId) ON DELETE CASCADE ON UPDATE CASCADE,
                                         FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE);
 
