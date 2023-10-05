@@ -128,7 +128,7 @@ class PostController
 
     getAllPost = async (req, res, next) => {
         new CREATED({
-            message: "get all posts success!",
+            message: "get all posts (friend posts also) success!",
             metaData: await PostService.getAllPost(req)
         }).send(res)
     }
