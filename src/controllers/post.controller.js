@@ -119,17 +119,17 @@ class PostController
         }).send(res)
     }
     // POST http://localhost:3055/post/allpost
-    getAllPost = async (req, res, next) => {
+    getMyPosts = async (req, res, next) => {
         new CREATED({
             message: "get all post by user id success!",
-            metaData: await PostService.getAllPost(req)
+            metaData: await PostService.getMyPosts(req)
         }).send(res)
     }
 
-    getAllPostV2 = async (req, res, next) => {
+    getAllPost = async (req, res, next) => {
         new CREATED({
             message: "get all posts success!",
-            metaData: await PostService.getAllPostV2(req)
+            metaData: await PostService.getAllPost(req)
         }).send(res)
     }
     

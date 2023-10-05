@@ -336,7 +336,7 @@ class PostService
         return {metaData: {}}
     }
 
-    static getAllPost = async (req) =>{
+    static getMyPosts = async (req) =>{
         const userId = req.cookies.userId
         if(!userId)
         {
@@ -350,7 +350,7 @@ class PostService
         }
     }
 
-    static getAllPostV2 = async (req) => {
+    static getAllPost = async (req) => {
         const userId = req.cookies.userId
         if(!userId)
         {

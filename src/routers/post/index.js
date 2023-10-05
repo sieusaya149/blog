@@ -35,17 +35,8 @@ router.post('/like/:postId', asyncHanlder(PostController.likePost))
 // router.post('/delta/:postId', asyncHanlder(PostController.updatePost))
 // router.post('/add-reading-list/:postId', asyncHanlder(PostController.updatePost))
 
-
-
-
-
-
+router.get('/allMyPost', asyncHanlder(PostController.getMyPosts))
 router.get('/allPost', asyncHanlder(PostController.getAllPost))
-router.get('/allPost_v2', asyncHanlder(PostController.getAllPostV2))
-
-
 router.get('/:postId', asyncHanlder(PostController.getPost))
-
-
 
 module.exports = router
