@@ -231,6 +231,25 @@ class PostService
         return {metaData: `Delete Post ${postId} Success`}
     }
 
+    static deleteAllPost = async (req) => {
+        const ans = req.query.ans
+        if(!ans || ans != 'true')
+        {
+            throw new BadRequestError("All your posts did not remove")
+        }
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Your are not have an authorization")
+        }
+        try {
+            await PostQuery.deletePostByUser(userId)
+        } catch (error) {
+            throw new BadRequestError("Can not delete Post")
+        }
+        return {metaData: `Delete all for user ${userId} Success`}
+    }
+
     static commentPost = async(req) => {
         const postId = req.params.postId;
         // commentId and parent comment Id might be null

@@ -68,6 +68,15 @@ class PostController
         msg.send(res)
     }
 
+    deleteAllPost = async (req, res, next) => {
+        const {metaData} = await PostService.deleteAllPost(req)
+        const msg = new OK({
+            message: "Delete All Successfull",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
     commentPost = async (req, res, next) => {
         const {metaData} = await PostService.commentPost(req)
         const msg = new OK({

@@ -111,6 +111,12 @@ class PostQuery extends QueryBase{
       const result = await this.dbInstance.hitQuery(query, [postId]);
     }
 
+    async deletePostByUser(userId)
+    {
+      const query = 'DELETE FROM POST WHERE userId = ?'
+      const result = await this.dbInstance.hitQuery(query, [userId]);
+    }
+
 
     async getPostByPostId(postId)
     {
