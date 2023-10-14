@@ -162,6 +162,20 @@ class PostController
             metaData: await PostService.getSavePosts(req)
         }).send(res)
     }
+
+    getSaveListName = async (req, res, next) => {
+        new CREATED({
+            message: "Get Name List Saved Success",
+            metaData: await PostService.getSaveListName(req)
+        }).send(res)
+    }
+
+    deleteSaveList = async (req, res, next) => {
+        new CREATED({
+            message: "Delete save list success",
+            metaData: await PostService.deleteSaveList(req)
+        }).send(res)
+    }
     
 }
 

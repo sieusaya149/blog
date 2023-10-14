@@ -43,8 +43,11 @@ router.get('/allPost', asyncHanlder(PostController.getAllPost))
 
 
 router.post('/savePost', asyncHanlder(PostController.savePost))
-router.get('/savePosts', asyncHanlder(PostController.getSavePosts))
-router.delete('/unSavePost', asyncHanlder(PostController.unSavePost))
+router.get('/savePosts/:saveListId', asyncHanlder(PostController.getSavePosts))
+router.delete('/unSavePost/:saveListId/:postId', asyncHanlder(PostController.unSavePost))
+router.get('/saveLists',asyncHanlder(PostController.getSaveListName))
+router.delete('/saveList/:saveListId',asyncHanlder(PostController.deleteSaveList))
+
 
 
 

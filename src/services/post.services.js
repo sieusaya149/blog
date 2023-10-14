@@ -394,37 +394,62 @@ class PostService
             throw new BadRequestError("Please give postId nameList")
         }
         const savePostQuery = new SavePostQuery()
-        await savePostQuery.saveNewPost(userId, nameList, postId)
+        return await savePostQuery.saveNewPost(userId, nameList, postId)
     }
 
     static unSavePost = async (req) => {
-        const {postId, nameList} = req.body
+        const {postId, saveListId} = req.params
         const userId = req.cookies.userId
         if(!userId)
         {
             throw new BadRequestError("Issue related to miss authentication info")
         }
-        if(!postId || !nameList)
+        if(!postId)
         {
-            throw new BadRequestError("Please give postId nameList")
+            throw new BadRequestError("Please give postId")
         }
         const savePostQuery = new SavePostQuery()
-        return await savePostQuery.unsavePost(userId, nameList, postId)
+        return await savePostQuery.unsavePost(userId, saveListId, postId)
     }
 
     static getSavePosts = async (req) => {
-        const {nameList} = req.body
+        const saveListId= req.params.saveListId
         const userId = req.cookies.userId
         if(!userId)
         {
             throw new BadRequestError("Issue related to miss authentication info")
         }
-        if(!nameList)
+        if(!saveListId)
         {
-            throw new BadRequestError("Please give  nameList")
+            throw new BadRequestError("Please give more information")
         }
         const savePostQuery = new SavePostQuery()
-        return await savePostQuery.getSavedPost(nameList, userId)
+        return await savePostQuery.getSavedPost(saveListId, userId)
+    }
+
+    static getSaveListName = async(req) => {
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.getSavedListByUserId(userId)
+    }
+
+    static deleteSaveList = async(req) => {
+        const saveListId= req.params.saveListId
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!saveListId)
+        {
+            throw new BadRequestError("Please give more information")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.deleteSavePostById(saveListId, userId)
     }
     
 }
