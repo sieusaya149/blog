@@ -26,7 +26,14 @@ router.get('/myFriends', asyncHanlder(UserController.getMyFriends))
 
 // notify
 router.get('/notifies', asyncHanlder(UserController.getAllNotify))
+// FIXME
+// the name of routes does not good till now, should change and move these routes
+// to other group
+router.put('/receivedNotifies', asyncHanlder(UserController.setReceivedNotifies))
+router.put('/readNotify/:notifyId', asyncHanlder(UserController.readNotify))
 
+// FIXME should change the name of recommend follower
+router.get('/recommendFollowing', asyncHanlder(UserController.getRecommendFollowings))
 
 
 module.exports = router

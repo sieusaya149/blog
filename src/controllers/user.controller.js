@@ -79,7 +79,6 @@ class UserController {
         })
         msg.send(res)
     }
-
     unfriend = async (req, res, next) => {
         var metaData = await UserService.unfriend(req)
         const msg = new OK({
@@ -92,16 +91,46 @@ class UserController {
     getMyFriends = async (req, res, next) => {
         var metaData = await UserService.getMyFriends(req)
         const msg = new OK({
-            message: "Get List Friends Successfullys",
+            message: "Get List Friends Successfully",
             metaData: metaData
         })
         msg.send(res)
     }
 
+    getRecommendFollowings = async (req, res, next) => {
+        var metaData = await UserService.getRecommendFollowings(req)
+        const msg = new OK({
+            message: "Get List Recommend Following Successfully",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    // FIXME should rename the function
     getAllNotify = async (req, res, next) => {
         var metaData = await UserService.getAllNotify(req)
         const msg = new OK({
-            message: "Get List Notifies Successfullys",
+            message: "Get List Notifies Successfully",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    // FIXME should rename the function
+    setReceivedNotifies = async (req, res, next) => {
+        var metaData = await UserService.setReceivedNotifies(req)
+        const msg = new OK({
+            message: "Set Received Notify Done",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    // FIXME should rename the function
+    readNotify = async (req, res, next) => {
+        var metaData = await UserService.readNotify(req)
+        const msg = new OK({
+            message: "Read Notify Done",
             metaData: metaData
         })
         msg.send(res)
