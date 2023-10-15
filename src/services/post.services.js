@@ -151,19 +151,27 @@ class PostService
     static readSinglePost = async (req) =>{
        //1. check post existed in db or not
        //2. get post data
-       //3. get author data
+       //4. get author data
        //4. return author data + post data to client
        const postId = req.params.postId
-       if(!postId)
+       const userId = req.cookies.userId
+       if(!postId || !userId)
         {
             throw new BadRequestError("Please give more infor")
         }
-       const postData = await PostQuery.getPostByPostId(postId)
-       if(postData == null)
+       if(await PostQuery.isUserCanReadPost(userId, postId))
        {
-           throw new BadRequestError("No Post Id")
+           const postData = await PostQuery.getPostByPostId(postId)
+           if(postData == null)
+           {
+               throw new BadRequestError("Your post request does not exist")
+           }
+           return {metaData: postData}
        }
-       return {metaData: postData}
+       else
+       {
+            throw new BadRequestError("You do not permission to view this post")
+       }
     }
 
     static editPost = async(req) => {
