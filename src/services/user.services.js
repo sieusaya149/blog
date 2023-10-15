@@ -21,6 +21,30 @@ class UserService
         }
     }
 
+    static getUserInfo = async (req) =>
+    {
+        const currentUserId = req.cookies.userId
+        const userId = req.params.userId
+        if(!userId || !currentUserId)
+        {
+            throw new BadRequestError("Please give more infor")
+        }
+        try {
+            const userExists = await UserQuery.checkUserExistById(userId)
+            if(userExists)
+            {
+                const userData = await UserQuery.getUserById(userId, currentUserId == userId)
+                return userData
+            }
+            else
+            {
+                throw new BadRequestError("User does not exist")
+            }
+        } catch (error) {
+            throw new Error(`Get Profile failed with reason ${error}`)
+        }
+    }
+
     static updateProfile = async (req) =>
     {
         const userId = req.cookies.userId

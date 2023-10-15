@@ -15,6 +15,16 @@ class UserController {
         msg.send(res)
     }
 
+    getUserInfo = async (req, res, next) => {
+        var metaData = await UserService.getUserInfo(req)
+        delete metaData.password
+        const msg = new OK({
+            message: "Getting User infor Success",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
     updateProfile  = async (req, res, next) => {
         var metaData = await UserService.updateProfile(req)
         delete metaData.password

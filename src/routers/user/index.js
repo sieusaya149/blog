@@ -11,6 +11,8 @@ router.use(authentication)
 
 // logout api
 router.get('/myProfile', asyncHanlder(UserController.getMyProfile))
+router.get('/getInfo/:userId', asyncHanlder(UserController.getUserInfo))
+
 router.put('/updateProfile', asyncHanlder(UserController.updateProfile))
 router.delete('/deleteProfile', asyncHanlder(UserController.deleteProfile))
 
