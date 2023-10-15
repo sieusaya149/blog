@@ -11,7 +11,7 @@ require('dotenv').config()
 
 router.use(authentication)
 
-
+router.get('/catetogies', asyncHanlder(PostController.getCategoryList))
 router.post('/publish', asyncHanlder(PostController.publishPost))
 router.post('/publish_v2', imageUpload.single('thumbnail'),  asyncHanlder(PostController.publishPostWithThumbnail))
 router.put('/republish/:postId', asyncHanlder(PostController.rePublishPost))

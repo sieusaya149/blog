@@ -14,6 +14,15 @@ class PostController
         msg.send(res)
     }
 
+    getCategoryList = async (req, res, next) => {
+        const metaData = await PostService.getCategoryList(req)
+        const msg = new OK({
+            message: "Get List Category Success!",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
     publishPostWithThumbnail = async (req, res, next) => {
         const metaData = await PostService.publishPostWithThumbnail(req)
         const msg = new OK({

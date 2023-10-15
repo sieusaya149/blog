@@ -165,6 +165,18 @@ class PostQuery extends QueryBase{
       }
     }
 
+    async getCategoryList()
+    {
+      try {
+        const query = `SELECT categroryName FROM CATEGORY`
+        const listCategrory = await this.dbInstance.hitQuery(query)
+        return listCategrory
+      } catch (error) {
+        console.error(error)
+        throw new BadRequestError('Issue happen when getting categrory')
+      }
+    }
+
     async getPostByUserId(userId, numberPosts)
     {
       try {

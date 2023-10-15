@@ -80,6 +80,10 @@ class PostService
         return {newPostId: postIdNew}
     }
 
+    static getCategoryList = async (req) => {
+        return await PostQuery.getCategoryList()
+    }
+
     static publishPostWithThumbnail = async (req) =>{
         const userId = req.cookies.userId;
         const parsingPostData = JSON.parse(req.body.postData)
