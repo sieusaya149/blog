@@ -14,6 +14,15 @@ class PostController
         msg.send(res)
     }
 
+    getCategoryList = async (req, res, next) => {
+        const metaData = await PostService.getCategoryList(req)
+        const msg = new OK({
+            message: "Get List Category Success!",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
     publishPostWithThumbnail = async (req, res, next) => {
         const metaData = await PostService.publishPostWithThumbnail(req)
         const msg = new OK({
@@ -63,6 +72,15 @@ class PostController
         const {metaData} = await PostService.deletePost(req)
         const msg = new OK({
             message: "Delete Post Successfull",
+            metaData: metaData
+        })
+        msg.send(res)
+    }
+
+    deleteAllPost = async (req, res, next) => {
+        const {metaData} = await PostService.deleteAllPost(req)
+        const msg = new OK({
+            message: "Delete All Successfull",
             metaData: metaData
         })
         msg.send(res)
@@ -119,17 +137,52 @@ class PostController
         }).send(res)
     }
     // POST http://localhost:3055/post/allpost
-    getAllPost = async (req, res, next) => {
+    getMyPosts = async (req, res, next) => {
         new CREATED({
             message: "get all post by user id success!",
+            metaData: await PostService.getMyPosts(req)
+        }).send(res)
+    }
+
+    getAllPost = async (req, res, next) => {
+        new CREATED({
+            message: "get all posts (friend posts also) success!",
             metaData: await PostService.getAllPost(req)
         }).send(res)
     }
 
-    getAllPostV2 = async (req, res, next) => {
+    savePost = async (req, res, next) => {
         new CREATED({
-            message: "get all posts success!",
-            metaData: await PostService.getAllPostV2(req)
+            message: "save post success",
+            metaData: await PostService.savePost(req)
+        }).send(res)
+    }
+
+    unSavePost = async (req, res, next) => {
+        new CREATED({
+            message: "unsave post success",
+            metaData: await PostService.unSavePost(req)
+        }).send(res)
+    }
+
+    getSavePosts = async (req, res, next) => {
+        new CREATED({
+            message: "get save post success",
+            metaData: await PostService.getSavePosts(req)
+        }).send(res)
+    }
+
+    getSaveListName = async (req, res, next) => {
+        new CREATED({
+            message: "Get Name List Saved Success",
+            metaData: await PostService.getSaveListName(req)
+        }).send(res)
+    }
+
+    deleteSaveList = async (req, res, next) => {
+        new CREATED({
+            message: "Delete save list success",
+            metaData: await PostService.deleteSaveList(req)
         }).send(res)
     }
     

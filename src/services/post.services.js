@@ -2,10 +2,9 @@ const instanceMySqlDB = require('../dbs/init.mysql')
 const {BadRequestError, AuthFailureError} = require("../core/error.response")
 const path = require('path');
 const PostQuery = require('../dbs/post.mysql')
-const { get } = require('../routers');
-const { query } = require('express');
 const TransactionQuery = require('../dbs/transaction.mysql')
 const ImageData = require("../dbs/image.mysql")
+const {SaveListQuery, SavePostQuery} = require('../dbs/savePost.mysql')
 const POST_BODY = {
     POST_TITLE: 'postTitle',
     POST_STATUS: 'postStatus',
@@ -81,6 +80,10 @@ class PostService
         return {newPostId: postIdNew}
     }
 
+    static getCategoryList = async (req) => {
+        return await PostQuery.getCategoryList()
+    }
+
     static publishPostWithThumbnail = async (req) =>{
         const userId = req.cookies.userId;
         const parsingPostData = JSON.parse(req.body.postData)
@@ -152,19 +155,27 @@ class PostService
     static readSinglePost = async (req) =>{
        //1. check post existed in db or not
        //2. get post data
-       //3. get author data
+       //4. get author data
        //4. return author data + post data to client
        const postId = req.params.postId
-       if(!postId)
+       const userId = req.cookies.userId
+       if(!postId || !userId)
         {
             throw new BadRequestError("Please give more infor")
         }
-       const postData = await PostQuery.getPostByPostId(postId)
-       if(postData == null)
+       if(await PostQuery.isUserCanReadPost(userId, postId))
        {
-           throw new BadRequestError("No Post Id")
+           const postData = await PostQuery.getPostByPostId(postId)
+           if(postData == null)
+           {
+               throw new BadRequestError("Your post request does not exist")
+           }
+           return {metaData: postData}
        }
-       return {metaData: postData}
+       else
+       {
+            throw new BadRequestError("You do not permission to view this post")
+       }
     }
 
     static editPost = async(req) => {
@@ -230,6 +241,25 @@ class PostService
             throw new BadRequestError("Can not delete Post")
         }
         return {metaData: `Delete Post ${postId} Success`}
+    }
+
+    static deleteAllPost = async (req) => {
+        const ans = req.query.ans
+        if(!ans || ans != 'true')
+        {
+            throw new BadRequestError("All your posts did not remove")
+        }
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Your are not have an authorization")
+        }
+        try {
+            await PostQuery.deletePostByUser(userId)
+        } catch (error) {
+            throw new BadRequestError("Can not delete Post")
+        }
+        return {metaData: `Delete all for user ${userId} Success`}
     }
 
     static commentPost = async(req) => {
@@ -336,7 +366,7 @@ class PostService
         return {metaData: {}}
     }
 
-    static getAllPost = async (req) =>{
+    static getMyPosts = async (req) =>{
         const userId = req.cookies.userId
         if(!userId)
         {
@@ -350,7 +380,7 @@ class PostService
         }
     }
 
-    static getAllPostV2 = async (req) => {
+    static getAllPost = async (req) => {
         const userId = req.cookies.userId
         if(!userId)
         {
@@ -362,6 +392,76 @@ class PostService
             numberPosts: numberPosts,
             listPost: listPost
         }
+    }
+
+    static savePost = async (req) => {
+        const {postId, nameList} = req.body
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!postId || !nameList)
+        {
+            throw new BadRequestError("Please give postId nameList")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.saveNewPost(userId, nameList, postId)
+    }
+
+    static unSavePost = async (req) => {
+        const {postId, saveListId} = req.params
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!postId)
+        {
+            throw new BadRequestError("Please give postId")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.unsavePost(userId, saveListId, postId)
+    }
+
+    static getSavePosts = async (req) => {
+        const saveListId= req.params.saveListId
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!saveListId)
+        {
+            throw new BadRequestError("Please give more information")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.getSavedPost(saveListId, userId)
+    }
+
+    static getSaveListName = async(req) => {
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.getSavedListByUserId(userId)
+    }
+
+    static deleteSaveList = async(req) => {
+        const saveListId= req.params.saveListId
+        const userId = req.cookies.userId
+        if(!userId)
+        {
+            throw new BadRequestError("Issue related to miss authentication info")
+        }
+        if(!saveListId)
+        {
+            throw new BadRequestError("Please give more information")
+        }
+        const savePostQuery = new SavePostQuery()
+        return await savePostQuery.deleteSavePostById(saveListId, userId)
     }
     
 }

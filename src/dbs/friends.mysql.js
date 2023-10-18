@@ -171,6 +171,45 @@ class FriendQuery extends QueryBase {
         const listFriends = await this.dbInstance.hitQuery(query, [userId]);
         return listFriends
     }
+
+    async getTotalNotFriend(userId) 
+    {
+        const query = ` SELECT COUNT(*) AS total_records
+                        FROM USER
+                        WHERE userId NOT IN ( SELECT userBId FROM FRIENDSHIPS WHERE userAId = ?)
+                            AND
+                            userId NOT IN (
+                                SELECT recipientId from FRIEND_REQUESTS WHERE requesterId = ? AND status <> 'Rejected'
+                            ) AND userId <> ?;`
+        const listNotFriendWithUser = await this.dbInstance.hitQuery(query, [userId, userId, userId]);
+        console.log(listNotFriendWithUser)
+        return listNotFriendWithUser[0].total_records
+    }
+
+    async getListNotFriendWithUser(userId, limit, offset)
+    {
+        
+        const query = `
+                    SELECT
+                        ROW_NUMBER() OVER (ORDER BY U.userId) AS _index, 
+                        U.userId, U.userName, U.bio,
+                        I.imageUrl AS avatar
+                    FROM USER U
+                    LEFT JOIN FRIENDSHIPS F
+                    ON U.userId = F.userBId AND F.userAId = ?
+                    LEFT JOIN IMAGE I
+                    ON U.userId = I.userId AND I.topic ='avatar'
+                    WHERE F.userBId IS NULL AND U.userId <> ?
+                    AND U.userId NOT IN (
+                    	SELECT recipientId from FRIEND_REQUESTS WHERE requesterId = ? AND status <> 'Rejected'
+                    )
+                    ORDER BY U.userId
+                    LIMIT ${limit} OFFSET ${offset};`
+
+        console.log(query)
+        const listNotFriendWithUser = await this.dbInstance.hitQuery(query, [userId, userId, userId]);
+        return listNotFriendWithUser
+    }
 }
 
 module.exports = new FriendQuery()

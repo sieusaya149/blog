@@ -30,9 +30,19 @@ class UserQuery extends QueryBase {
         }
     }
 
-    async getUserById(userId) {
+    async getUserById(userId, owner = true) {
         try {
-        const query = 'SELECT * FROM USER WHERE userId = ?';
+        
+        let query = `SELECT U.*, I.imageUrl as AvatarUrl
+                     FROM USER U
+                     LEFT JOIN IMAGE I
+                     ON U.userId = I.userId AND I.topic = 'avatar'
+                     WHERE U.userId = ?`;
+        if(owner == false)
+        {
+            // FIXME should change if the data for owner and non-owner difference
+            // query = 'SELECT * FROM USER WHERE userId = ?';
+        }
         const results = await this.dbInstance.hitQuery(query, [userId]);
         if(results.length !=1)
         {

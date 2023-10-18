@@ -7,7 +7,7 @@ const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE, NOTIFICATION_CONFIG} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {NotifyManager} = require("./notification.services")
-const { getApi } = require('../helpers/callApi')
+const { getApi, putApi } = require('../helpers/callApi')
 class UserService
 {
     static getMyProfile = async (req) =>
@@ -16,6 +16,30 @@ class UserService
         try {
             const userData = await UserQuery.getUserById(userId)
             return userData
+        } catch (error) {
+            throw new Error(`Get Profile failed with reason ${error}`)
+        }
+    }
+
+    static getUserInfo = async (req) =>
+    {
+        const currentUserId = req.cookies.userId
+        const userId = req.params.userId
+        if(!userId || !currentUserId)
+        {
+            throw new BadRequestError("Please give more infor")
+        }
+        try {
+            const userExists = await UserQuery.checkUserExistById(userId)
+            if(userExists)
+            {
+                const userData = await UserQuery.getUserById(userId, currentUserId == userId)
+                return userData
+            }
+            else
+            {
+                throw new BadRequestError("User does not exist")
+            }
         } catch (error) {
             throw new Error(`Get Profile failed with reason ${error}`)
         }
@@ -226,12 +250,79 @@ class UserService
         }
     }
 
+    static getRecommendFollowings = async (req) => {
+        const userId = req.cookies.userId
+        const limit = req.query.limit || 3
+        let page = Number(req.query.page) || 1
+        if(!userId)
+        {
+            throw new BadRequestError('Please give more information')
+        }
+        try {
+            const totalRecommend = await FriendQuery.getTotalNotFriend(userId)
+            const maxPage = Math.ceil(totalRecommend/limit)
+            console.log(maxPage)
+            let nextPage = 0
+            if(page > maxPage || maxPage == 0)
+            {
+                page = 1
+                nextPage = maxPage == 0? 1: page + 1;
+            }
+            else
+            {
+                nextPage = page + 1
+            }
+            const offset = (page  - 1) * limit;
+            const listNotFriendWithUser = await FriendQuery.getListNotFriendWithUser(userId, limit, offset)
+            // if go to next page, the next page is 1, looping
+            const linkNextPage = `http://${req.host}:3000/v1/api/user/recommendFollowing?limit=${limit}&page=${nextPage}`
+            // FIXME the prev link does not used now, so maybe some issue there
+            const linkPreviousPage = `http://${req.host}:3000/v1/api/user/recommendFollowing?limit=${limit}&page=${page-1}`
+            return {
+                        totalPage: maxPage,
+                        nextPage: linkNextPage,
+                        prevPage: linkPreviousPage,
+                        totalRecommend,
+                        RecommendFollowList: listNotFriendWithUser
+                    }
+        } catch (error) {
+            throw new BadRequestError(error)
+        }
+    }
+
     static getAllNotify = async (req) => {
         const userId = req.cookies.userId
+        // FIXME HARD CODE LINK
         const url = "http://notification_backend:3002/notifies/"+userId
         console.log(url)
         const data = await getApi(url)
-        return {data}
+        return data.data // FIXME the data was return from notify service is data. data this is not god
+    }
+
+    static setReceivedNotifies = async (req) => {
+        const userId = req.cookies.userId
+        // FIXME HARD CODE LINK
+        const url = "http://notification_backend:3002/receivedApi/"+userId
+        console.log(url)
+        try {
+            const data = await putApi(url)
+            return {data}
+        } catch (error) {
+            throw new BadRequestError("Issue in notify service")
+        }
+    }
+
+    static readNotify = async (req) => {
+        const notifyId = req.params.notifyId
+        // FIXME HARD CODE LINK
+        const url = "http://notification_backend:3002/readNotify/"+notifyId
+        console.log(url)
+        try {
+            const data = await putApi(url)
+            return {data}
+        } catch (error) {
+            throw new BadRequestError("Issue in notify service")
+        }
     }
 }
 
