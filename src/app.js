@@ -12,7 +12,9 @@ require('dotenv').config()
 //A. init middeware
 // allow all site can access the API
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: ['https://blog.hunghoang.online',
+             'http://localhost:3000',
+             'http://localhost:3001'],
     credentials: true
 }));
 // parse cookie
@@ -48,7 +50,7 @@ app.use((req, res, next) => {
 })
 
 app.use((error, req, res, next) => {
-    console.log("hadling error")
+    console.log("handing error")
     const statusCode = error.status || 500
     return res.status(statusCode).json({
         status: 'error',
