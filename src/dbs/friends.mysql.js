@@ -28,7 +28,7 @@ class FriendQuery extends QueryBase {
     {
         if(status == 'Accepted' || status == 'Rejected' || status == 'Pending')
         {
-            const query = "UPDATE FRIEND_REQUESTS set status = ? where requesterId = ? and recipientId = ?"
+            const query = "UPDATE FRIEND_REQUESTS SET status = ? WHERE requesterId = ? and recipientId = ?"
             await this.dbInstance.hitQuery(query, [status, requesterId, recipientId])
         }
         else

@@ -98,7 +98,7 @@ class PostQuery extends QueryBase{
 
     async updatePostCategoryTable(postId, categroryId)
     {
-      const checkQuery = "SELECT COUNT(*) as count from POSTCATEGORY WHERE postId = ? AND categroryId = ?"
+      const checkQuery = "SELECT COUNT(*) AS count FROM POSTCATEGORY WHERE postId = ? AND categroryId = ?"
       const result = await this.dbInstance.hitQuery(checkQuery, [postId, categroryId]);
       if(result[0].count > 0)
       {
@@ -287,7 +287,7 @@ class PostQuery extends QueryBase{
     async getNumberPostOfUser(userId)
     {
       try {
-        const numsPostQuery = 'SELECT COUNT(*) as total_records FROM POST WHERE userId = ?';
+        const numsPostQuery = 'SELECT COUNT(*) AS total_records FROM POST WHERE userId = ?';
         const result = await this.dbInstance.hitQuery(numsPostQuery, [userId]);
         return result[0]['total_records']
       }
@@ -325,7 +325,7 @@ class PostQuery extends QueryBase{
                                 FROM POST P
                                 LEFT JOIN FRIENDSHIPS F 
                                 ON P.userId = F.userAId AND F.userBId =  ?
-                                where ((userId= ?)
+                                WHERE ((userId= ?)
                                         OR (sharePermission ='public' AND statusEdit ='publish')
                                         OR (P.userId = F.userAId AND sharePermission = 'follower' AND statusEdit ='publish'))
                                         AND postId = ?;`;
@@ -360,7 +360,7 @@ class PostQuery extends QueryBase{
 
     async updatePostStatus(status, postId)
     {
-      const query = "UPDATE POST set statusEdit = ? where postId = ?"
+      const query = "UPDATE POST SET statusEdit = ? WHERE postId = ?"
       const result = await this.dbInstance.hitQuery(query, [status, postId])
       if(result.affectedRows == 0)
       {
@@ -372,7 +372,7 @@ class PostQuery extends QueryBase{
     {
       if(commendId)
       {
-        const query = "UPDATE COMMENT set commentText = ?, postId = ?, userId = ?, parentCommentId=? where commentId = ?"
+        const query = "UPDATE COMMENT SET commentText = ?, postId = ?, userId = ?, parentCommentId=? WHERE commentId = ?"
         const result = await this.dbInstance.hitQuery(query, [commentText, postId, userId, parentCommentId, commendId])
         if(result.affectedRows == 0)
         {
@@ -394,7 +394,7 @@ class PostQuery extends QueryBase{
 
     async upSertLikeForPost(postId, userId)
     {
-      const checkQuery = "SELECT * from LIKE_EMOTION WHERE postId = ? AND userId = ?"
+      const checkQuery = "SELECT * FROM LIKE_EMOTION WHERE postId = ? AND userId = ?"
       var result = await this.dbInstance.hitQuery(checkQuery, [postId, userId]);
       if(result.length == 1)
       {
@@ -464,7 +464,7 @@ class PostQuery extends QueryBase{
     async getCommentByPostId(postId, hiddenSubComment = true)
     {
       try {
-        const appendQuery = hiddenSubComment? " AND parentCommentId is NULL ": ""
+        const appendQuery = hiddenSubComment? " AND parentCommentId IS NULL ": ""
         const getCommentSql = `SELECT commentId, commentText, userId, updated_at, created_at FROM COMMENT \
                                WHERE postId = ? ${appendQuery}\
                                ORDER BY created_at DESC`;
@@ -489,7 +489,7 @@ class PostQuery extends QueryBase{
     async deleteComment(commentId, userId)
     {
       try {
-        const deleteCommentSql = 'DELETE FROM COMMENT WHERE commentId = ?  and userId = ?';
+        const deleteCommentSql = 'DELETE FROM COMMENT WHERE commentId = ?  AND userId = ?';
         const commentData = await this.dbInstance.hitQuery(deleteCommentSql, [commentId, userId]);
         console.log(commentData)
         if(commentData.affectedRows == 1)

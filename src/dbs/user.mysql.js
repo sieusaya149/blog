@@ -112,7 +112,7 @@ class UserQuery extends QueryBase {
 
     async updatePassword(newPassword, userId) {
         try {
-        const query = 'UPDATE USER set password = ? WHERE userId = ?';
+        const query = 'UPDATE USER SET password = ? WHERE userId = ?';
         await this.dbInstance.hitQuery(query, [newPassword, userId]);
         return userId;
         } catch (error) {

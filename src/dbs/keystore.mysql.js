@@ -10,7 +10,7 @@ class KeyStoreQuery extends QueryBase {
         const query = 'SELECT * FROM KEYSTORE WHERE userId = ? ';
         const result = await this.dbInstance.hitQuery(query, [userId]);
         return result.length > 0? result[0]: null;
-      }
+      } 
       catch (error) {
         return null
       }
@@ -24,7 +24,7 @@ class KeyStoreQuery extends QueryBase {
                              VALUES (UUID(),?, ?, ?, ?, ?, ?)`;
         await this.dbInstance.hitQuery(insertQuery, [publicKey, privateKey, accessToken, refreshToken, refreshTokenUsed, userId]);
         
-        const getKeyIdQuery = 'SELECT LAST_INSERT_ID() as keyStoreId';
+        const getKeyIdQuery = 'SELECT LAST_INSERT_ID() AS keyStoreId';
         const keyIdResult = await this.dbInstance.hitQuery(getKeyIdQuery);
         return keyIdResult[0].id;
     }

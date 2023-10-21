@@ -41,7 +41,7 @@ class ImageData extends QueryBase{
           if(avatarExisting.length == 1)
           {
             // FIXME should delete image on disk also
-            const query = "UPDATE IMAGE set imageUrl = ? where userId = ? and topic = ?"
+            const query = "UPDATE IMAGE SET imageUrl = ? WHERE userId = ? and topic = ?"
             const result = await this.dbInstance.hitQuery(query, [imageUrl, userId, topic])
             if(result.affectedRows == 0)
             {
@@ -58,7 +58,7 @@ class ImageData extends QueryBase{
           if(thumbnailExisting.length == 1)
           {
               // FIXME should delete image on disk also
-              const query = "UPDATE IMAGE set imageUrl = ? where postId = ? and topic = ?"
+              const query = "UPDATE IMAGE SET imageUrl = ? WHERE postId = ? and topic = ?"
               const result = await this.dbInstance.hitQuery(query, [imageUrl, postId, topic])
               if(result.affectedRows == 0)
               {
