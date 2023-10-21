@@ -2,9 +2,7 @@ version: "3.8"
 
 services: 
     app:
-      build: 
-        context: .
-        dockerfile: Dockerfile
+      image: hunghoang149/blog:v0
       ports: 
         - 3000:3000
       container_name: backend
@@ -52,9 +50,7 @@ services:
             - phpmyadmin
     
     utils:
-        build: 
-          context: ./utils
-          dockerfile: Dockerfile
+        image: hunghoang149/blog_utils:v0
         container_name: utils
         volumes:
           - ./utils/script:/script
