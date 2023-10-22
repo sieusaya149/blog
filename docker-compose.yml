@@ -2,7 +2,7 @@ version: "3.8"
 
 services: 
     app:
-      image: hunghoang149/blog:v0
+      image: hunghoang149/blog:v1
       ports: 
         - 3000:3000
       container_name: backend
@@ -50,7 +50,7 @@ services:
             - phpmyadmin
     
     utils:
-        image: hunghoang149/blog_utils:v0
+        image: hunghoang149/blog_utils:v1
         container_name: utils
         volumes:
           - ./utils/script:/script
