@@ -17,14 +17,12 @@ class SuccessResponse {
             statusCode = StatusCode.OK, 
             reasonCode = ReasonCode.OK,
             metaData = {},
-            cookies = {}
         }
     )
     {
         this.message = !message ? reasonCode : message
         this.status = statusCode
         this.metaData = metaData
-        this.cookies = cookies 
     }
 
     send (res, headers = {})
@@ -36,44 +34,20 @@ class SuccessResponse {
     {
         return res.sendFile(filename)
     }
-
-    sendWithCookies(res)
-    {
-        for (const property in this.cookies)
-        {
-            res.cookie(`${property}`, this.cookies[property], { httpOnly: true, secure: true });
-        }
-        return res.status(this.status).json(this)
-    }
-    // FIXME should have the way clear cookies that easy to understand more
-    sendWithResetCookiesAfterLogout(res)
-    {
-        res.clearCookie('accessToken')
-        res.clearCookie('refreshToken')
-        res.clearCookie('userId')
-        return this.send(res)
-    }
-    // FIXME should have the way clear cookies that easy to understand more
-    sendWithResetCookiesAfterResetPassword(res)
-    {
-        res.clearCookie('verifyCode')
-        res.clearCookie('userId')
-        return this.send(res)
-    }
 }
 
 
 class OK extends SuccessResponse{
-    constructor({message, metaData, cookies})
+    constructor({message, metaData})
     {
-        super({message, metaData, cookies})
+        super({message, metaData})
     }
 }
 
 class CREATED extends SuccessResponse{
-    constructor({message, statusCode = StatusCode.CREATED, reasonCode = ReasonCode.CREATED, metaData, cookies})
+    constructor({message, statusCode = StatusCode.CREATED, reasonCode = ReasonCode.CREATED, metaData})
     {
-        super({message, statusCode, reasonCode, metaData, cookies})
+        super({message, statusCode, reasonCode, metaData})
     }
 }
 

@@ -36,13 +36,12 @@ class UserController {
     }
 
     deleteProfile = async (req, res, next) => {
-        var metaData = await UserService.deleteProfile(req)
+        var metaData = await UserService.deleteProfile(req, res)
         // delete metaData.password
-        const msg = new OK({
+        new OK({
             message: "Delete My Profile Success",
             metaData: metaData
-        })
-        msg.sendWithResetCookiesAfterLogout(res)
+        }).send(res)
     }
 
     verifyEmailForUser = async (req, res, next) => {

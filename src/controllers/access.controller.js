@@ -14,53 +14,52 @@ class AccessController
     }
     // @POST http://localhost:3055/v1/api/auth/login
     login = async (req, res, next) => {
-        const {metaData, cookies} = await AccessService.login(req.body)
-        const msg = new CREATED({
+        const {metaData} = await AccessService.login(req,res)
+        new CREATED({
             message: "Login Success!",
-            metaData: metaData,
-            cookies: cookies
-        })
-        msg.sendWithCookies(res)
+            metaData: metaData
+        }).send(res)
+    }
+
+    googleLogin = async (req, res, next) => {
+        const {metaData} = await AccessService.googleLogin(req, res)
+        new CREATED({
+            message: "Login By Google Success!",
+            metaData: metaData
+        }).send(res)
     }
 
     // @POST http://localhost:3055/v1/api/auth/logout
     logout = async (req, res, next) => {
-        const msg = new CREATED({
+        new CREATED({
             message: "Logout Success!",
-            metaData: await AccessService.logout(req.keyStore)
-        })
-        msg.sendWithResetCookiesAfterLogout(res)
+            metaData: await AccessService.logout(req, res)
+        }).send(res)
     }
 
     // @POST http://localhost:3055/v1/api/auth/forgot-password
     forgotPassword = async (req, res, next) => {
-        const {metaData, cookies} = await AccessService.forgotPassword(req)
-        const msg = new OK({
+        const {metaData} = await AccessService.forgotPassword(req, res)
+        new OK({
             message: "Sent Mail Successful",
             metaData: metaData,
-            cookies: cookies
-        })
-        msg.sendWithCookies(res)
+        }).send(res)
     }
     // @POST http://localhost:3055/v1/api/auth/forgot-password/:verifyCode
     forgotPasswordVerify = async (req, res, next) => {
-        const {metaData, cookies} = await AccessService.forgotPasswordVerify(req)
-        const msg = new OK({
+        const {metaData} = await AccessService.forgotPasswordVerify(req,res)
+        new OK({
             message: "You Can Change New Password",
-            metaData: metaData,
-            cookies: cookies
-        })
-        msg.sendWithCookies(res)
+            metaData: metaData
+        }).send(res)
     }
     // @POST http://localhost:3055/v1/api/auth/reset-password
     resetPassword = async(req, res, next) => {
-        const {metaData, cookies} = await AccessService.resetPassword(req)
-        const msg = new OK({
+        const {metaData} = await AccessService.resetPassword(req, res)
+        new OK({
             message: "updated new password",
             metaData: metaData,
-            cookies: cookies
-        })
-        msg.sendWithResetCookiesAfterResetPassword(res)
+        }).send(res)
     }
 
     ping = async(req, res, next) => {
