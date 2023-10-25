@@ -47,10 +47,10 @@ class AccessController
 
     callbackFacebookLogin = async (req, res, next) => {
         const {metaData} = await AccessService.callbackFacebookLogin(req, res)
-        new OK({
+        new REDIRECT({
             message: "Callback login By Facebook Success!",
             metaData: metaData
-        }).send(res)
+        }).redirectToFrontEnd(res)
     }
 
     // @POST http://localhost:3055/v1/api/auth/logout

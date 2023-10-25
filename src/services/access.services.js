@@ -12,7 +12,7 @@ const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {getOauthGooleToken, getGoogleUser, revokeAccessTokenGoogle,getOauthGoogleUrl} = require('../helpers/OauthGoogle')
-const {getOauthFacebookDialog, getFacebookAccessKey, getFacebookUser} = require('../helpers/OauthFacebook')
+const {getOauthFacebookDialog, getFacebookAccessKey, getFacebookUser, revokeAccessTokenFacebook} = require('../helpers/OauthFacebook')
 const ImageData = require("../dbs/image.mysql")
 const {createCookiesAuthen, createCookiesLogout,
        createCookiesForgotPassword,
@@ -190,10 +190,16 @@ class AccessService
         try {
             const existingOauthUsr = await oauthProviderQuery.getOauthProvider(userId)
             console.log(existingOauthUsr)
-            if(existingOauthUsr)
+            if(existingOauthUsr && existingOauthUsr.providerName == oauthProviderName.GOOGLE)
             {
-                console.log("clean cloud provider infor")
+                console.log("clean google oauth provider infor")
                 await revokeAccessTokenGoogle(existingOauthUsr.accessToken)
+                await oauthProviderQuery.deleteOauthProvider(userId)
+            }
+            else if(existingOauthUsr && existingOauthUsr.providerName == oauthProviderName.FACEBOOK)
+            {
+                console.log("clean facebook oauth provider infor")
+                await revokeAccessTokenFacebook(existingOauthUsr.accessToken)
                 await oauthProviderQuery.deleteOauthProvider(userId)
             }
         } catch (error) {

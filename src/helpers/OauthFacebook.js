@@ -13,6 +13,7 @@ const getOauthFacebookDialog = () => {
       'email',
       'public_profile'
     ].join(' '),
+    auth_type: "reauthenticate",
     state: "{st=state123abc,ds=123456789}"
   }
   const qs = new URLSearchParams(options)
@@ -43,4 +44,13 @@ const getFacebookUser = async (access_token) => {
   return data
 }
 
-module.exports = {getOauthFacebookDialog, getFacebookAccessKey, getFacebookUser}
+const revokeAccessTokenFacebook = async(access_token) => {
+  try {
+    const revokeAccessTokenUrl = `https://graph.facebook.com/v18.0/me/permissions?access_token=${access_token}`
+    const result = await axios.delete(revokeAccessTokenUrl)
+    console.log("revoke facebook token success")
+  } catch (error) {
+    console.log("revoke facebook token failed")
+  }
+}
+module.exports = {getOauthFacebookDialog, getFacebookAccessKey, getFacebookUser, revokeAccessTokenFacebook}
