@@ -2,13 +2,15 @@
 CREATE TABLE IF NOT EXISTS USER(userId CHAR(36),
                                 userName VARCHAR(255) UNIQUE NOT NULL,
                                 email VARCHAR(255) UNIQUE NOT NULL,
-                                password VARCHAR(255) UNIQUE NOT NULL,
+                                password VARCHAR(255) DEFAULT NULL, -- The password can be NULL for OAuth users
                                 bio LONGTEXT DEFAULT NULL,
-                                birthDay DATE,
+                                birthDay DATE DEFAULT NULL,
                                 verified BOOLEAN DEFAULT FALSE,
+                                oauth_provider BOOLEAN DEFAULT FALSE, -- Column to store OAuth provider (e.g., Google, Facebook)
                                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                PRIMARY KEY(userId));
+                                PRIMARY KEY(userId)
+);
 -- 2 create POST table
 CREATE TABLE IF NOT EXISTS POST(postId CHAR(36),
                                 title VARCHAR(1500) NOT NULL,
@@ -182,4 +184,13 @@ CREATE TABLE IF NOT EXISTS SAVELIST_POST(saveListPostId CHAR(36) NOT NULL,
                                         FOREIGN KEY (saveListId) REFERENCES SAVELIST(saveListId) ON DELETE CASCADE ON UPDATE CASCADE,
                                         FOREIGN KEY (postId) REFERENCES POST(postId) ON DELETE CASCADE ON UPDATE CASCADE);
 
--- test          
+-- 18
+CREATE TABLE IF NOT EXISTS OAUTH_PROVIDERS( oauthProviderId CHAR(36),
+                                            userId CHAR(36),
+                                            providerName ENUM('google', 'facebook', 'github') NOT NULL,
+                                            tokenId LONGTEXT NOT NULL,
+                                            accessToken VARCHAR(255) NOT NULL,
+                                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                            PRIMARY KEY (oauthProviderId),
+                                            FOREIGN KEY (userId) REFERENCES USER(userId) ON DELETE CASCADE);
