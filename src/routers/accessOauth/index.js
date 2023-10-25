@@ -10,4 +10,7 @@ const accessController = require('../../controllers/access.controller')
 router.get('/google/login', asyncHanlder(accessController.googleLogin))
 router.get('/google/callback/login', asyncHanlder(accessController.callbackGoogleLogin))
 
+router.get('/facebook/login', asyncHanlder(accessController.facebookLogin))
+router.get('/facebook/callback/login', asyncHanlder(accessController.callbackFacebookLogin))
+
 module.exports = router

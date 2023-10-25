@@ -32,10 +32,10 @@ class SuccessResponse {
         return res.status(this.status).json(this)
     }
 
-    redirectToGoogleConsent(res)
+    redirectToOauthPage(res)
     {
-        const {googleConsentUrl} = this.metaData
-        res.redirect(this.status, googleConsentUrl)
+        const {oauthUrl} = this.metaData
+        res.redirect(this.status, oauthUrl)
     }
 
     redirectToFrontEnd(res)

@@ -12,6 +12,7 @@ const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {getOauthGooleToken, getGoogleUser, revokeAccessTokenGoogle,getOauthGoogleUrl} = require('../helpers/OauthGoogle')
+const {getOauthFacebookDialog, getFacebookAccessKey, getFacebookUser} = require('../helpers/OauthFacebook')
 const ImageData = require("../dbs/image.mysql")
 const {createCookiesAuthen, createCookiesLogout,
        createCookiesForgotPassword,
@@ -117,7 +118,7 @@ class AccessService
     {
         const googleConsentUrl = getOauthGoogleUrl();
         return {metaData: {
-            googleConsentUrl
+            oauthUrl: googleConsentUrl
         }}
     }
 
@@ -203,6 +204,72 @@ class AccessService
         return delKey
     }
 
+    static facebookLogin = async(req, res) => 
+    {
+        const facebookUrl = getOauthFacebookDialog();
+        return {metaData: {
+                oauthUrl: facebookUrl
+        }}
+    }
+
+    static callbackFacebookLogin = async (req, res) =>
+    {
+        const {code} = req.query
+        console.log(code)
+        try {
+            const data = await getFacebookAccessKey(code)
+            console.log(data)
+            const { access_token } = data 
+            const facebookUser = await getFacebookUser(access_token)
+            console.log(facebookUser)
+            const {email, name} = facebookUser
+            await TransactionQuery.startTransaction()
+            try {
+                let exist = await UserQuery.getUserFromMail(email)
+                let maxWhileTimes = 3
+                while(!exist && maxWhileTimes)
+                {
+                    console.warn(`time ${3-maxWhileTimes} create new user if not exist`)
+                    maxWhileTimes--; // ensure the while loop can end
+                    // if the user does not existing in db create new
+                    await UserQuery.addUser(name, email, null, null, false, true)
+                    exist = await UserQuery.getUserFromMail(email)
+                }
+                
+                const {userId} = exist
+                await oauthProviderQuery.addNewOauthProvider(userId, oauthProviderName.FACEBOOK, null, access_token)
+                // update avatar for user
+                const publicKey = crypto.randomBytes(64).toString('hex')
+                const privateKey = crypto.randomBytes(64).toString('hex')
+                const tokens = await createTokenPair({userId: userId, email: email},
+                                                    publicKey,
+                                                    privateKey)
+                await KeyStoreQuery.addKeyStore(publicKey,
+                                                privateKey,
+                                                tokens.accessToken,
+                                                tokens.refreshToken,
+                                                "{}",
+                                                userId)
+                const metaData = {userId: userId,
+                                  newTokens: 
+                                    {
+                                        accessKey: tokens.accessToken,
+                                        refreshKey: tokens.refreshToken
+                                    }
+                                 }
+                createCookiesAuthen(res, tokens.accessToken, tokens.accessToken, userId)
+                await TransactionQuery.commitTransaction()
+                return {metaData}
+            } catch (error) {
+                console.log(error)
+                await TransactionQuery.rollBackTransaction()
+                throw new BadRequestError("Error: Issue when create new user and keystore")       
+            }
+        } catch (error) {
+            console.log(error)
+            throw new Error("Issue happen when login by google")
+        }
+    }
     static forgotPassword = async (req, res) => {
         //1. check mail exist or not in body
         const email = req.body.email

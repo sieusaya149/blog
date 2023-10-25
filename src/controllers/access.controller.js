@@ -26,7 +26,7 @@ class AccessController
         new REDIRECT({
             message: "Login By Google Success!",
             metaData: metaData
-        }).redirectToGoogleConsent(res)
+        }).redirectToOauthPage(res)
     }
 
     callbackGoogleLogin = async (req, res, next) => {
@@ -35,6 +35,22 @@ class AccessController
             message: "Callback login By Google Success!",
             metaData: metaData
         }).redirectToFrontEnd(res)
+    }
+
+    facebookLogin = async (req, res, next) => {
+        const {metaData} = await AccessService.facebookLogin(req, res)
+        new REDIRECT({
+            message: "Login By Facebook Success!",
+            metaData: metaData
+        }).redirectToOauthPage(res)
+    }
+
+    callbackFacebookLogin = async (req, res, next) => {
+        const {metaData} = await AccessService.callbackFacebookLogin(req, res)
+        new OK({
+            message: "Callback login By Facebook Success!",
+            metaData: metaData
+        }).send(res)
     }
 
     // @POST http://localhost:3055/v1/api/auth/logout
