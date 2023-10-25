@@ -8,6 +8,7 @@ const {TIMEOUT, VERIFYCODE_TYPE, NOTIFICATION_CONFIG} = require('../configs/conf
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {NotifyManager} = require("./notification.services")
 const { getApi, putApi } = require('../helpers/callApi')
+const { createCookiesLogout } = require('../cookies/createCookies')
 class UserService
 {
     static getMyProfile = async (req) =>
@@ -63,11 +64,13 @@ class UserService
         }
     }
 
-    static deleteProfile = async (req) => 
+    static deleteProfile = async (req, res) => 
     {
         const userId = req.cookies.userId
         try {
-            return await UserQuery.deleteUser(userId)
+            const deteteResult = await UserQuery.deleteUser(userId)
+            createCookiesLogout(res)
+            return deteteResult
         } catch (error) {
             throw new Error(`Delete Profile failed with reason ${error}`)
         }

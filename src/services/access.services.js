@@ -1,5 +1,6 @@
 const instanceMySqlDB = require('../dbs/init.mysql')
 const UserQuery  = require('../dbs/user.mysql')
+const {oauthProviderQuery, oauthProviderName} = require('../dbs/oauthProvider.mysql')
 const KeyStoreQuery = require('../dbs/keystore.mysql')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
@@ -10,6 +11,11 @@ const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
+const {getOauthGooleToken, getGoogleUser, revokeAccessTokenGoogle} = require('../helpers/OauthGoogle')
+const ImageData = require("../dbs/image.mysql")
+const {createCookiesAuthen, createCookiesLogout,
+       createCookiesForgotPassword,
+       createCookiesVerifyCode, createCookiesResetPasswordSuccess} = require("../cookies/createCookies")
 class AccessService
 {
     //1. Check username and email does not exist in the database
@@ -66,8 +72,8 @@ class AccessService
         4 - generate token
         5 - get data return login
     */ 
-    static login = async ({username, email, password}) => {
-
+    static login = async (req, res) => {
+        const {username, email, password} = req.body
         const userInstance =  await UserQuery.getUserName(username)
         // for case db has problem
         if(userInstance == null)
@@ -102,22 +108,93 @@ class AccessService
                           newTokens: {accessKey: tokens.accessToken,
                                       refreshKey: tokens.refreshToken}
                          }
-        const cookies = { accessToken: tokens.accessToken,
-                          refreshToken: tokens.refreshToken,
-                          userId: instanceId} 
-        
-        return {metaData, cookies}
+        createCookiesAuthen(res, tokens.accessToken, tokens.accessToken, instanceId)
+        return {metaData}
     }
-    
-    static logout = async (keyStore) =>{
+
+    static googleLogin = async (req, res) =>
+    {
+        const {code} = req.query
+        try {
+            const data = await getOauthGooleToken(code)
+            console.log(data)
+            const { id_token, access_token } = data 
+            const googleUser = await getGoogleUser({ id_token, access_token }) 
+            const {email, name, picture, verified_email} = googleUser
+            await TransactionQuery.startTransaction()
+            try {
+                let exist = await UserQuery.getUserFromMail(email)
+                let maxWhileTimes = 3
+                while(!exist && maxWhileTimes)
+                {
+                    console.warn(`time ${3-maxWhileTimes} create new user if not exist`)
+                    maxWhileTimes--; // ensure the while loop can end
+                    // if the user does not existing in db create new
+                    await UserQuery.addUser(name, email, null, null, verified_email, true)
+                    exist = await UserQuery.getUserFromMail(email)
+                }
+                
+                const {userId} = exist
+                await UserQuery.updateVerifiedStatus(verified_email,userId)
+                await oauthProviderQuery.addNewOauthProvider(userId, oauthProviderName.GOOGLE, id_token, access_token)
+                // update avatar for user
+                await ImageData.insertImageToDb(picture,'avatar',userId)
+                const publicKey = crypto.randomBytes(64).toString('hex')
+                const privateKey = crypto.randomBytes(64).toString('hex')
+                const tokens = await createTokenPair({userId: userId, email: email},
+                                                    publicKey,
+                                                    privateKey)
+                await KeyStoreQuery.addKeyStore(publicKey,
+                                                privateKey,
+                                                tokens.accessToken,
+                                                tokens.refreshToken,
+                                                "{}",
+                                                userId)
+                const metaData = {userId: userId,
+                                  newTokens: 
+                                    {
+                                        accessKey: tokens.accessToken,
+                                        refreshKey: tokens.refreshToken
+                                    }
+                                 }
+                createCookiesAuthen(res, tokens.accessToken, tokens.accessToken, userId)
+                await TransactionQuery.commitTransaction()
+                return {metaData}
+            } catch (error) {
+                console.log(error)
+                await TransactionQuery.rollBackTransaction()
+                throw new BadRequestError("Error: Issue when create new user and keystore")       
+            }
+        } catch (error) {
+            console.log(error)
+            throw new Error("Issue happen when login by google")
+        }
+    }
+
+    static logout = async (req, res) =>{
         //FIX ME USER ID need take from the access token rather than the request body
-        console.log("clear key store")
-        const delKey = await KeyStoreQuery.deleteKeyStore(keyStore.userId)
-        console.log(`${delKey}`)
+        const {keyStore} = req
+        const {userId} = keyStore
+        const delKey = await KeyStoreQuery.deleteKeyStore(userId)
+        // check if the user authentication is oauth shoud revoke
+        try {
+            const existingOauthUsr = await oauthProviderQuery.getOauthProvider(userId)
+            console.log(existingOauthUsr)
+            if(existingOauthUsr)
+            {
+                console.log("clean cloud provider infor")
+                await revokeAccessTokenGoogle(existingOauthUsr.accessToken)
+                await oauthProviderQuery.deleteOauthProvider(userId)
+            }
+        } catch (error) {
+            console.error(`Error when checking the oauthprovider for user ${userId}`)
+        }
+       
+        createCookiesLogout(res)
         return delKey
     }
 
-    static forgotPassword = async (req) => {
+    static forgotPassword = async (req, res) => {
         //1. check mail exist or not in body
         const email = req.body.email
         if(!email)
@@ -137,32 +214,32 @@ class AccessService
         console.log(`code is ${code}`)
         await VerifyCodeQuery.createNewVerifyCode(code, codeExpiry, VERIFYCODE_TYPE.FORGOT_PASSWORD, userExist.userId)
         mailTransport.send(email,'reset code', code)
-        const cookies = { userId: userExist.userId } 
         const metaData = {
-            link:"http://localhost:3000/v1/api/auth//auth/forgot-password/:id"
+            msg: "Please check your email"
         }
-       return {metaData, cookies}
+        createCookiesForgotPassword(res, userExist.userId)
+       return {metaData}
     }
 
-    static forgotPasswordVerify = async (req) => {
+    static forgotPasswordVerify = async (req, res) => {
+        // FIXME because useId is depend on the cookies that lead to can not reset on another device
         const code = req.params.verifyCode
         const userId = req.cookies.userId
         const metaData = {}
-        const cookies = {}
         const existingCode = await VerifyCodeQuery.checkCodeExistOrNot(code, userId, VERIFYCODE_TYPE.FORGOT_PASSWORD)
         if(existingCode != null)
         {
-            cookies.verifyCode = code
+            createCookiesVerifyCode(res, code)
         }
         else
         {
             throw new BadRequestError("Incorrect Code Please Fill Again")
         }
         
-        return {metaData, cookies}
+        return {metaData}
     }
 
-    static resetPassword = async (req) => {
+    static resetPassword = async (req,res) => {
         // check password new and confirm exist
         const userId = req.cookies.userId
         const verifyCode = req.cookies.verifyCode
@@ -184,6 +261,7 @@ class AccessService
         } catch (error) {
             throw new BadRequestError('Update password is not successful')
         }
+        createCookiesResetPasswordSuccess(res)
         return "Update Password Success"
     }
 }
