@@ -11,11 +11,12 @@ const {generateVerificationCode} = require('../helpers/randomCode')
 const mailTransport = require('../helpers/mailHelper')
 const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
-const {getOauthGooleToken, getGoogleUser, revokeAccessTokenGoogle} = require('../helpers/OauthGoogle')
+const {getOauthGooleToken, getGoogleUser, revokeAccessTokenGoogle,getOauthGoogleUrl} = require('../helpers/OauthGoogle')
 const ImageData = require("../dbs/image.mysql")
 const {createCookiesAuthen, createCookiesLogout,
        createCookiesForgotPassword,
-       createCookiesVerifyCode, createCookiesResetPasswordSuccess} = require("../cookies/createCookies")
+       createCookiesVerifyCode, createCookiesResetPasswordSuccess,
+       } = require("../cookies/createCookies")
 class AccessService
 {
     //1. Check username and email does not exist in the database
@@ -111,8 +112,16 @@ class AccessService
         createCookiesAuthen(res, tokens.accessToken, tokens.accessToken, instanceId)
         return {metaData}
     }
+    
+    static googleLogin = async(req, res) => 
+    {
+        const googleConsentUrl = getOauthGoogleUrl();
+        return {metaData: {
+            googleConsentUrl
+        }}
+    }
 
-    static googleLogin = async (req, res) =>
+    static callbackGoogleLogin = async (req, res) =>
     {
         const {code} = req.query
         try {

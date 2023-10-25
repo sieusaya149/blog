@@ -1,6 +1,6 @@
 'use strict'
 const instanceMySqlDB = require('../dbs/init.mysql')
-const {OK, CREATED} = require('../core/success.response')
+const {OK, CREATED, REDIRECT} = require('../core/success.response')
 
 const AccessService = require('../services/access.services')
 class AccessController
@@ -23,10 +23,18 @@ class AccessController
 
     googleLogin = async (req, res, next) => {
         const {metaData} = await AccessService.googleLogin(req, res)
-        new CREATED({
+        new REDIRECT({
             message: "Login By Google Success!",
             metaData: metaData
-        }).send(res)
+        }).redirectToGoogleConsent(res)
+    }
+
+    callbackGoogleLogin = async (req, res, next) => {
+        const {metaData} = await AccessService.callbackGoogleLogin(req, res)
+        new REDIRECT({
+            message: "Callback login By Google Success!",
+            metaData: metaData
+        }).redirectToFrontEnd(res)
     }
 
     // @POST http://localhost:3055/v1/api/auth/logout

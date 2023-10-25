@@ -2,12 +2,14 @@
 
 const StatusCode = {
     OK: 200,
-    CREATED: 201
+    CREATED: 201,
+    REDIRECT: 302
 }
 
 const ReasonCode = {
     CREATED: "Created",
-    OK: "Success"
+    OK: "Success",
+    REDIRECT: "Redirect"
 }
 
 class SuccessResponse {
@@ -30,6 +32,18 @@ class SuccessResponse {
         return res.status(this.status).json(this)
     }
 
+    redirectToGoogleConsent(res)
+    {
+        const {googleConsentUrl} = this.metaData
+        res.redirect(this.status, googleConsentUrl)
+    }
+
+    redirectToFrontEnd(res)
+    {
+        const feUrl = "http://localhost:3001"
+        res.redirect(this.status, feUrl)
+    }
+
     sendFile (res, filename)
     {
         return res.sendFile(filename)
@@ -50,8 +64,15 @@ class CREATED extends SuccessResponse{
         super({message, statusCode, reasonCode, metaData})
     }
 }
+class REDIRECT extends SuccessResponse{
+    constructor({message, statusCode = StatusCode.REDIRECT, reasonCode = ReasonCode.REDIRECT, metaData})
+    {
+        super({message, statusCode, reasonCode, metaData})
+    }
+}
 
 module.exports = {
     OK, 
-    CREATED
+    CREATED,
+    REDIRECT
 }

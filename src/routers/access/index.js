@@ -10,9 +10,6 @@ require('dotenv').config()
 router.post('/signup', asyncHanlder(accessController.signUp))
 //login
 router.post('/login', asyncHanlder(accessController.login))
-
-//when the google login success full this endpoint will be triggered
-router.get('/google/login', asyncHanlder(accessController.googleLogin))
 // forgot password
 router.post('/forgot-password/:verifyCode', asyncHanlder(accessController.forgotPasswordVerify))
 router.post('/forgot-password', asyncHanlder(accessController.forgotPassword))
