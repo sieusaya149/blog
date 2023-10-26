@@ -79,9 +79,9 @@ class UserQuery extends QueryBase {
         }
     }
 
-    async getUserFromMail(email) {
+    async getNonOauthUserByMail(email) {
         try {
-        const query = 'SELECT * FROM USER WHERE email = ?';
+        const query = 'SELECT * FROM USER WHERE email = ? AND oauth_provider = FALSE';
         const results = await this.dbInstance.hitQuery(query, [email]);
             if(results.length == 0)
             {
@@ -97,6 +97,54 @@ class UserQuery extends QueryBase {
             }
         } catch (error) {
         console.log(error)
+        return null
+        }
+    }
+
+    async getUserByUserName(userName) {
+        try {
+        const query = 'SELECT * FROM USER WHERE userName = ? ';
+        const results = await this.dbInstance.hitQuery(query, [userName]);
+            if(results.length == 0)
+            {
+                return null
+            }
+            else if(results.length ==1)
+            {
+                return results[0]
+            }
+            else
+            {
+                throw new Error (`More than one user name is ${userName}`)
+            }
+        } catch (error) {
+        console.log(error)
+        return null
+        }
+    }
+
+    async getOauthUserByEmail(email, oauthProvider) {
+        try {
+        const query = `SELECT * 
+                        FROM USER U
+                        LEFT JOIN OAUTH_PROVIDERS O
+                        ON U.userId = O.userId
+                        WHERE U.email = ? AND O.providerName = ?`;
+        const results = await this.dbInstance.hitQuery(query, [email, oauthProvider]);
+            if(results.length == 0)
+            {
+                return null
+            }
+            else if(results.length ==1)
+            {
+                return results[0]
+            }
+            else
+            {
+                throw new Error (`More than one user of oauth provider ${oauthProvider} use ${email}`)
+            }
+        } catch (error) {
+            console.log(error)
         return null
         }
     }
@@ -132,7 +180,7 @@ class UserQuery extends QueryBase {
         const query = `INSERT INTO USER (userId, userName, email, password, birthDay, verified, oauth_provider)
                        VALUES (UUID(), ?, ?, ?, ?, ?, ?)`;
         await this.dbInstance.hitQuery(query, [username, email, password, birthDay,verified, oauth]);
-        const newUser = await this.getUserFromMail(email)
+        const newUser = await this.getUserByUserName(username)
         return newUser.userId
     }
 

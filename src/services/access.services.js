@@ -13,6 +13,7 @@ const {TIMEOUT, VERIFYCODE_TYPE} = require('../configs/configurations')
 const TransactionQuery = require('../dbs/transaction.mysql')
 const {getOauthGooleToken, getGoogleUser, revokeAccessTokenGoogle,getOauthGoogleUrl} = require('../helpers/OauthGoogle')
 const {getOauthFacebookDialog, getFacebookAccessKey, getFacebookUser, revokeAccessTokenFacebook} = require('../helpers/OauthFacebook')
+const {getOauthGithubDialog, getGithubAccessKey, getGithubUserData, revokeAccessTokenGithub, getGithubUserEmail} = require('../helpers/OauthGithub')
 const ImageData = require("../dbs/image.mysql")
 const {createCookiesAuthen, createCookiesLogout,
        createCookiesForgotPassword,
@@ -126,27 +127,32 @@ class AccessService
     {
         const {code} = req.query
         try {
+            const oauthProvider = oauthProviderName.GOOGLE
             const data = await getOauthGooleToken(code)
+            console.log('===== GOOGLE ACCESS KEY INFOR========')
             console.log(data)
             const { id_token, access_token } = data 
             const googleUser = await getGoogleUser({ id_token, access_token }) 
+            console.log('===== GOOGLE USER INFOR========')
+            console.log(googleUser)
             const {email, name, picture, verified_email} = googleUser
             await TransactionQuery.startTransaction()
             try {
-                let exist = await UserQuery.getUserFromMail(email)
+                let exist = await UserQuery.getOauthUserByEmail(email, oauthProvider)
                 let maxWhileTimes = 3
                 while(!exist && maxWhileTimes)
                 {
                     console.warn(`time ${3-maxWhileTimes} create new user if not exist`)
                     maxWhileTimes--; // ensure the while loop can end
                     // if the user does not existing in db create new
-                    await UserQuery.addUser(name, email, null, null, verified_email, true)
-                    exist = await UserQuery.getUserFromMail(email)
+                    const userId = await UserQuery.addUser(name, email, null, null, verified_email, true)
+                    // create a oauth record
+                    await oauthProviderQuery.addNewOauthProvider(userId, oauthProvider, id_token, access_token)
+                    exist = await UserQuery.getOauthUserByEmail(email, oauthProvider)
                 }
                 
                 const {userId} = exist
                 await UserQuery.updateVerifiedStatus(verified_email,userId)
-                await oauthProviderQuery.addNewOauthProvider(userId, oauthProviderName.GOOGLE, id_token, access_token)
                 // update avatar for user
                 await ImageData.insertImageToDb(picture,'avatar',userId)
                 const publicKey = crypto.randomBytes(64).toString('hex')
@@ -202,6 +208,12 @@ class AccessService
                 await revokeAccessTokenFacebook(existingOauthUsr.accessToken)
                 await oauthProviderQuery.deleteOauthProvider(userId)
             }
+            else if(existingOauthUsr && existingOauthUsr.providerName == oauthProviderName.GITHUB)
+            {
+                console.log("clean github oauth provider infor")
+                await revokeAccessTokenGithub(existingOauthUsr.accessToken)
+                await oauthProviderQuery.deleteOauthProvider(userId)
+            }
         } catch (error) {
             console.error(`Error when checking the oauthprovider for user ${userId}`)
         }
@@ -223,28 +235,32 @@ class AccessService
         const {code} = req.query
         console.log(code)
         try {
+            const oauthProvider = oauthProviderName.FACEBOOK
             const data = await getFacebookAccessKey(code)
+            console.log('===== FACEBOOK ACCESS KEY INFOR========')
             console.log(data)
             const { access_token } = data 
             const facebookUser = await getFacebookUser(access_token)
+            console.log('===== FACEBOOK USER INFOR========')
             console.log(facebookUser)
             const {email, name} = facebookUser
             await TransactionQuery.startTransaction()
             try {
-                let exist = await UserQuery.getUserFromMail(email)
+                let exist = await UserQuery.getOauthUserByEmail(email, oauthProvider)
                 let maxWhileTimes = 3
                 while(!exist && maxWhileTimes)
                 {
                     console.warn(`time ${3-maxWhileTimes} create new user if not exist`)
                     maxWhileTimes--; // ensure the while loop can end
                     // if the user does not existing in db create new
-                    await UserQuery.addUser(name, email, null, null, false, true)
-                    exist = await UserQuery.getUserFromMail(email)
+                    const userId = await UserQuery.addUser(name, email, null, null, false, true)
+                    // create a oauth record
+                    await oauthProviderQuery.addNewOauthProvider(userId, oauthProvider, null, access_token)
+                    exist = await UserQuery.getOauthUserByEmail(email, oauthProvider)
                 }
                 
                 const {userId} = exist
-                await oauthProviderQuery.addNewOauthProvider(userId, oauthProviderName.FACEBOOK, null, access_token)
-                // update avatar for user
+                await oauthProviderQuery.addNewOauthProvider(userId, oauthProvider, null, access_token)
                 const publicKey = crypto.randomBytes(64).toString('hex')
                 const privateKey = crypto.randomBytes(64).toString('hex')
                 const tokens = await createTokenPair({userId: userId, email: email},
@@ -273,9 +289,98 @@ class AccessService
             }
         } catch (error) {
             console.log(error)
-            throw new Error("Issue happen when login by google")
+            throw new Error("Issue happen when login by facebook")
         }
     }
+
+    static githubLogin = async(req, res) => 
+    {
+        const githubAurthorUrl = getOauthGithubDialog();
+        return {metaData: {
+                oauthUrl: githubAurthorUrl
+        }}
+    }
+
+    static callbackGithubLogin = async(req, res) => {
+        const {code} = req.query
+        console.log(code)
+        try {
+            const oauthProvider = oauthProviderName.GITHUB
+            const data = await getGithubAccessKey(code)
+            console.log('===== GITHUB ACCESS KEY INFOR========')
+            console.log(data)
+            const { access_token } = data 
+            const githubUser = await getGithubUserData(access_token)
+            const githubEmails = await getGithubUserEmail(access_token)
+            console.log('===== GITHUB USER INFOR========')
+            console.log(githubUser)
+            console.log(githubEmails)
+            const {login, avatar_url} = githubUser
+            const name = login
+            let email = ''
+            let verified = false
+            for(let i = 0; i < githubEmails.length ; i++)
+            {
+                const {primary} = githubEmails[i]
+                if(primary == true)
+                {
+                    email = githubEmails[i].email
+                    verified = githubEmails[i].verified
+                }
+            }
+            await TransactionQuery.startTransaction()
+            try {
+                let exist = await UserQuery.getOauthUserByEmail(email, oauthProvider)
+                let maxWhileTimes = 3
+                while(!exist && maxWhileTimes)
+                {
+                    console.warn(`time ${3-maxWhileTimes} create new user if not exist`)
+                    maxWhileTimes--; // ensure the while loop can end
+                    // if the user does not existing in db create new
+                    const userId = await UserQuery.addUser(name, email, null, null, false, true)
+                    // create a oauth record
+                    await oauthProviderQuery.addNewOauthProvider(userId, oauthProvider, verified, access_token)
+                    exist = await UserQuery.getOauthUserByEmail(email, oauthProvider)
+                }
+                
+                const {userId} = exist
+                await oauthProviderQuery.addNewOauthProvider(userId, oauthProvider, null, access_token)
+                // update avatar for user
+                await ImageData.insertImageToDb(avatar_url,'avatar',userId)
+                await UserQuery.updateVerifiedStatus(verified,userId)
+
+                const publicKey = crypto.randomBytes(64).toString('hex')
+                const privateKey = crypto.randomBytes(64).toString('hex')
+                const tokens = await createTokenPair({userId: userId, email: email},
+                                                    publicKey,
+                                                    privateKey)
+                await KeyStoreQuery.addKeyStore(publicKey,
+                                                privateKey,
+                                                tokens.accessToken,
+                                                tokens.refreshToken,
+                                                "{}",
+                                                userId)
+                const metaData = {userId: userId,
+                                  newTokens: 
+                                    {
+                                        accessKey: tokens.accessToken,
+                                        refreshKey: tokens.refreshToken
+                                    }
+                                 }
+                createCookiesAuthen(res, tokens.accessToken, tokens.accessToken, userId)
+                await TransactionQuery.commitTransaction()
+                return {metaData}
+            } catch (error) {
+                console.log(error)
+                await TransactionQuery.rollBackTransaction()
+                throw new BadRequestError("Error: Issue when create new user and keystore")       
+            }
+        } catch (error) {
+            console.log(error)
+            throw new Error("Issue happen when login by github")
+        }
+    }
+
     static forgotPassword = async (req, res) => {
         //1. check mail exist or not in body
         const email = req.body.email
@@ -284,7 +389,7 @@ class AccessService
             throw new BadRequestError("Please Fill Email") //403
         }
         //2. check mail exist or not in the db
-        const userExist = await UserQuery.getUserFromMail(email)
+        const userExist = await UserQuery.getNonOauthUserByMail(email)
         if(!userExist)
         {
             throw new BadRequestError("The email does not register yet") //403

@@ -53,6 +53,22 @@ class AccessController
         }).redirectToFrontEnd(res)
     }
 
+    githubLogin = async (req, res, next) => {
+        const {metaData} = await AccessService.githubLogin(req, res)
+        new REDIRECT({
+            message: "Login By Github Success!",
+            metaData: metaData
+        }).redirectToOauthPage(res)
+    }
+
+    callbackGithubLogin = async (req, res, next) => {
+        const {metaData} = await AccessService.callbackGithubLogin(req, res)
+        new OK({
+            message: "Callback login By Github Success!",
+            metaData: metaData
+        }).send(res)
+    }
+
     // @POST http://localhost:3055/v1/api/auth/logout
     logout = async (req, res, next) => {
         new CREATED({

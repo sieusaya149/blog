@@ -13,4 +13,7 @@ router.get('/google/callback/login', asyncHanlder(accessController.callbackGoogl
 router.get('/facebook/login', asyncHanlder(accessController.facebookLogin))
 router.get('/facebook/callback/login', asyncHanlder(accessController.callbackFacebookLogin))
 
+router.get('/github/login', asyncHanlder(accessController.githubLogin))
+router.get('/github/callback/login', asyncHanlder(accessController.callbackGithubLogin))
+
 module.exports = router

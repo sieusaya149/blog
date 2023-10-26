@@ -1,7 +1,7 @@
 -- 1 create USER table
 CREATE TABLE IF NOT EXISTS USER(userId CHAR(36),
                                 userName VARCHAR(255) UNIQUE NOT NULL,
-                                email VARCHAR(255) UNIQUE NOT NULL,
+                                email VARCHAR(255) NOT NULL,
                                 password VARCHAR(255) DEFAULT NULL, -- The password can be NULL for OAuth users
                                 bio LONGTEXT DEFAULT NULL,
                                 birthDay DATE DEFAULT NULL,
